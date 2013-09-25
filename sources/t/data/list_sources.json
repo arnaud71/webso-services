@@ -1,0 +1,12 @@
+[
+{
+    "id":"s_2",
+    "type_s":"source",     
+    "creation_date_dt":"2012-12-12T23:59:59.999Z",
+    "updating_date_dt":"2012-12-12T23:59:59.999Z",
+    "source_type_s":"rss",
+    "source_url_s":"http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology",
+    "source_user_s":"user1",
+    "source_level_sharing_i":0
+}
+]

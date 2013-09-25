@@ -1,0 +1,145 @@
+#!/usr/bin/perl
+######################################################################
+# sources/put.json 
+# 
+# add sources to webso
+#
+# inputs:
+#   - source_url :              string : required
+#   - source_type:              string : required
+#   - source_user:              string : retuired
+#   - source_level_sharing :    int
+# Contributors:
+#   - Arnaud Gaudinat : 11/07/2013
+######################################################################
+
+use strict;
+use CGI;
+use JSON;
+use lib "..";
+use LWP::UserAgent;
+use Config::Simple;
+use Digest::MD5 qw(md5 md5_hex md5_base64);
+
+
+
+my $q       = CGI->new;
+# prepare the JSON msg
+my $json    = JSON->new->allow_nonref;
+
+my %perl_response = (    
+    );
+
+# print json header
+print $q->header('application/json');
+
+# reading the conf file
+my $cfg     = new Config::Simple('../../webso.cfg');
+
+if (Config::Simple->error()) {
+    $perl_response{'debug_msg'} = Config::Simple->error();
+    push @{$perl_response{'error'}},'Config file error';
+}
+else {
+my $deb_mod = $cfg->param('debug');
+
+
+
+
+
+
+my $SOURCE_URL              = $cfg->param('source_url');
+my $SOURCE_TYPE             = $cfg->param('source_type'); 
+my $SOURCE_USER             = $cfg->param('source_user');
+my $SOURCE_LEVEL_SHARING    = $cfg->param('source_level_sharing');
+
+
+my $source_url = q{};
+if ($q->param('source_url')) {
+    $source_url     = $q->param('source_url');
+}
+else {
+     push @{$perl_response{'error'}},'source_url required ';
+}
+
+my $source_type = q{};
+if ($q->param('source_type')) {
+    $source_type    = $q->param('source_type');
+}
+else {
+     push @{$perl_response{'error'}}, 'source_type required';
+}
+
+my $source_user = q{};
+if ($q->param('source_user')) {
+    $source_user    = $q->param('source_user');
+}
+else {
+     push @{$perl_response{'error'}},'source_user required';
+}
+
+
+my $source_level_sharing = 0;
+if ($q->param('source_level_sharing')) {
+    $source_level_sharing    = $q->param('source_level_sharing');
+    
+}
+
+if (!(exists $perl_response{'error'})) { 
+my $id = md5_hex($source_user.$source_url);
+
+my %query = (
+    'id'                    => 's_'.$id,
+    'type_s'                => 'source',
+    
+    $SOURCE_URL             => $source_url,
+    $SOURCE_TYPE            => $source_type,
+    $SOURCE_USER            => $source_user,
+    $SOURCE_LEVEL_SHARING   => $source_level_sharing,
+    
+    );
+
+
+
+
+my $json_text   = $json->pretty->encode(\%query);
+
+# concatenate query and response
+%perl_response = (%perl_response,%query);
+
+
+# init user_agent
+my $ua = LWP::UserAgent->new;
+$ua->timeout(10);
+$ua->env_proxy;
+
+# accessing values:
+#my $db_source = $cfg->param('db_source').'update -H \'Content-type:application/json\' -d ';
+
+
+my $req = HTTP::Request->new(
+        POST => $cfg->param('db_source').'update'
+      );
+$req->content_type('application/json'); 
+$req->content('['.$json_text.']');
+
+my $response = $ua->request($req);
+
+#my $response = $ua->get($json_query);
+ 
+if ($response->is_success) {
+     $perl_response{success} = $json->decode( $response->decoded_content);  # or whatever
+     
+}
+else {
+    $perl_response{'error'} = 'sources server or service: '.$response->code;
+    if ($deb_mod) {
+        $perl_response{'debug_msg'} = $response->message;	
+    }	
+}
+}
+
+}
+my $json_response   = $json->pretty->encode(\%perl_response); 
+print $json_response; 
+ 
