@@ -21,6 +21,7 @@ use DateTime::Format::RSS;
 use Time::localtime;
 use Log::Log4perl qw(:easy);
 use Config::Simple;
+use JSON;
 
 
 my $cfg = new Config::Simple('../webso.cfg');
@@ -51,8 +52,13 @@ my $datetime    = q{}; # string to keep local time for each crawl
 my $nb          = 0;
 
 
-#my $url     = 'http://feeds.boston.com/boston/business/technology';
+my $url     = 'http://feeds.boston.com/boston/business/technology';
 
+
+my $json    = JSON->new->allow_nonref;
+
+my $cfg = new Config::Simple('../../webso.cfg');
+my $webso_services = $cfg->param('webso_services');
 
 
 if ($url eq q{} ) {
@@ -64,8 +70,26 @@ if ($url eq q{} ) {
 
 my $url_page = $url;
 
+my $ua = LWP::UserAgent->new;
 my $response = my_get($ua, $url_page);
 
+my $response = $ua->get($webso_services.'fetcher_agent/fetcher_agent.pl'.$params);
+
+    if ($cfg->param('debug')) {
+        print $webso_services.'fetcher_agent/fetcher_run.pl'.$params."\n";
+    }
+
+    my $r_json;
+    if ($response->is_success) {
+        $r_json = $json->decode( $response->decoded_content);
+        if ($cfg->param('debug')) {
+            print $webso_services.'harvester/fetcher_run.pl'.$params."\n";
+            print $$r_json{content};
+        }
+    }
+    else {
+        $$r_json{error} = 'service fetcher_agent is not accessible';
+    }
 
 exit;
 
@@ -211,24 +235,6 @@ sub update_page_content {
 
 }
 
-#######################################
-#### user agent which try several get
-######################################
-sub my_get {
-    my ($ua, $url_page)= @_;
-    my $res = $ua->get($url_page);
-    my $count = 5;
-    while ($res->code==500) {
-        my $sleep_time = int(rand($MAX_TIME_SLEEP-$MIN_TIME_SLEEP))+$MIN_TIME_SLEEP;
-        sleep($sleep_time);
-        get_logger("crawler")->trace("ERROR: wait ".." $url_page");
-        if ($count--<1) {
-            last;
-        }
-        $res = $ua->get($url_page);
-    }
-    return $res;
-}
 
 
 sub clean_url {

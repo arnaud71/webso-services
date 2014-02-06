@@ -30,8 +30,9 @@ use LWP::UserAgent;
 use Config::Simple;
 use URI::Encode qw(uri_encode uri_decode);
 use JSON;
+use CGI;
 
-
+print "Content-type: application/json\n\n";
 my $json    = JSON->new->allow_nonref;
 
 my $cfg = new Config::Simple('../webso.cfg');
@@ -39,7 +40,7 @@ my $webso_services = $cfg->param('webso_services');
 
 
 ########### get params
-my $q       = CGI->new;
+my $q   = CGI->new;
 my $url = q{};
 
 
@@ -49,7 +50,6 @@ if ($q->param('url')) {
 if ($q->param('callback')) {
     $callback   = $q->param('callback');
 }
-
 
 
 # init user_agent
@@ -63,7 +63,7 @@ my $params = '?url='.$url_encoded;
 my $response = $ua->get($webso_services.'fetcher_agent/fetcher_agent.pl'.$params);
 
 if ($cfg->param('debug')) {
-    print $webso_services.'fetcher_agent/fetcher_agent.pl'.$params."\n";
+    #print $webso_services.'fetcher_agent/fetcher_agent.pl'.$params."\n";
 }
 
 my $r_json;
@@ -71,8 +71,8 @@ my $r_json;
 if ($response->is_success) {
     $r_json = $json->decode( $response->decoded_content);
     if ($cfg->param('debug')) {
-            print $webso_services.'fetcher_agent/fetcher_agent.pl'.$params."\n";
-            print $$r_json{content};
+            #print $webso_services.'fetcher_agent/fetcher_agent.pl'.$params."\n";
+            #print $$r_json{content};
     }
 
 }

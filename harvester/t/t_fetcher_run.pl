@@ -32,10 +32,10 @@ foreach my $url (@tab_url) {
     my $url_encoded = $url;
     my $params = '?url='.$url_encoded;
 
-    my $response = $ua->get($webso_services.'fetcher_agent/fetcher_agent.pl'.$params);
+    my $response = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
 
     if ($cfg->param('debug')) {
-        print $webso_services.'fetcher_agent/fetcher_run.pl'.$params."\n";
+        print $webso_services.'harvester/fetcher_run.pl'.$params."\n";
     }
 
     my $r_json;
@@ -47,7 +47,7 @@ foreach my $url (@tab_url) {
         }
     }
     else {
-        $$r_json{error} = 'service fetcher_agent is not accessible';
+        $$r_json{error} = 'service fetcher_run is not accessible';
     }
 
     # test if response code 200 for $url
