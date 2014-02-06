@@ -1,3 +1,5 @@
+#!/usr/bin/perl
+
 # test the fetcher_agent
 use strict;
 
@@ -14,9 +16,8 @@ my @tab_url;
 # list of url to test
 push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
 push @tab_url,'http://feeds.feedburner.com/bitem/news';
-push @tab_url,'https://www.hon.ch';
+#push @tab_url,'https://www.hon.ch';
 push @tab_url,'http://gigaom.com/2011/05/09/kinect-skype-video-calling-magic/?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+OmMalik+%28GigaOM%3A+Tech%29&utm_content=Google+Reader';
-
 
 
 

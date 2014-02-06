@@ -20,8 +20,10 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use DateTime::Format::RSS;
 use Time::localtime;
 use Log::Log4perl qw(:easy);
+use Config::Simple;
 
 
+my $cfg = new Config::Simple('../webso.cfg');
 
 
 # get params
@@ -36,7 +38,7 @@ my $debug       = $ARGV[2];
 my $logconf = "
     log4perl.logger.crawler                         = TRACE, crawlerAppender
     log4perl.appender.crawlerAppender               = Log::Log4perl::Appender::File
-    log4perl.appender.crawlerAppender.filename      = /var/log/webso/rss_harvester.log
+    log4perl.appender.crawlerAppender.filename      = ".$cfg->param('log_dir')."rss_harvester.log
     log4perl.appender.crawlerAppender.layout        = PatternLayout
     log4perl.appender.crawlerAppender.layout.ConversionPattern=%d - %m{chomp}%n
 

@@ -24,11 +24,13 @@ use WWW::UserAgent::Random;
 use DateTime::Format::RSS;
 use Time::localtime;
 use Log::Log4perl qw(:easy);
+use Config::Simple;
 use JSON;
 use CGI;
 
 #### init
 
+my $cfg = new Config::Simple('../webso.cfg');
 
 my $q               = CGI->new;
 # prepare the JSON msg
@@ -57,7 +59,7 @@ my $url             = $ARGV[0]; #required
 my $logconf = "
     log4perl.logger.crawler                         = TRACE, crawlerAppender
     log4perl.appender.crawlerAppender               = Log::Log4perl::Appender::File
-    log4perl.appender.crawlerAppender.filename      = /var/log/webso/rss_checker.log
+    log4perl.appender.crawlerAppender.filename      = ".$cfg->param('log_dir')."rss_checker.log
     log4perl.appender.crawlerAppender.layout        = PatternLayout
     log4perl.appender.crawlerAppender.layout.ConversionPattern=%d - %m{chomp}%n
 

@@ -47,12 +47,14 @@ use Crypt::SSLeay;
 ########### init log file
 
 
-mkdir '/tmp/webso';
+#mkdir '/tmp/webso';
+my $cfg = new Config::Simple('../webso.cfg');
+
 
 my $logconf = "
     log4perl.logger.crawler                         = TRACE, crawlerAppender
     log4perl.appender.crawlerAppender               = Log::Log4perl::Appender::File
-    log4perl.appender.crawlerAppender.filename      = /var/log/webso/fetcher_agent.log
+    log4perl.appender.crawlerAppender.filename      = ".$cfg->param('log_dir')."fetcher_agent.log
     log4perl.appender.crawlerAppender.layout        = PatternLayout
     log4perl.appender.crawlerAppender.layout.ConversionPattern=%d - %m{chomp}%n
 
@@ -61,7 +63,7 @@ Log::Log4perl::init(\$logconf);
 
 ######### get config
 
-my $cfg = new Config::Simple('../webso.cfg');
+
 my $webso_services  = $cfg->param('webso_services');
 my $USE_PROXY       = $cfg->param('use_proxy');
 my $PROXY           = $cfg->param('proxy');
@@ -109,10 +111,12 @@ if (($response->is_success) || ($response->is_redirect)) {
     $perl_response{'content'}   = $response->content;
     $perl_response{'code'}      = $response->code;
     $perl_response{'error'}     = 'none';
+    get_logger("crawler")->trace("OK: $url");
 }
 else {
     $perl_response{'error'} = "error fetching $url";
     $perl_response{'code'} = $response->code;
+    get_logger("crawler")->trace("ERROR: code:".$response->code." $url");
 }
 
 
@@ -150,6 +154,7 @@ sub my_get {
         }
         $res = $ua->get($url_page);
     }
+
     return $res;
 }
 

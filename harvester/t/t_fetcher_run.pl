@@ -12,7 +12,7 @@ my @tab_url;
 
 # list of url to test
 push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
-#push @tab_url,'http://feeds.feedburner.com/bitem/news';
+push @tab_url,'http://feeds.feedburner.com/bitem/news';
 #push @tab_url,'https://www.hon.ch';
 
 
