@@ -42,7 +42,7 @@ use CGI;
 use Log::Log4perl qw(:easy);
 use JSON;
 use Crypt::SSLeay;
-
+use HTTP::Cookies;
 
 ########### init log file
 
@@ -68,10 +68,10 @@ my $webso_services  = $cfg->param('webso_services');
 my $USE_PROXY       = $cfg->param('use_proxy');
 my $PROXY           = $cfg->param('proxy');
 
-my $RANDOM_AGENT    = 1;       # activate simulation of a random browser name (better)
-my $RANDOM_SLEEP    = 1;       # active sleep during a random period of time between 2 crawl of the same site
-my $MIN_TIME_SLEEP  = 10;       # min sleep time between 2 crawl of the same site
-my $MAX_TIME_SLEEP  = 30;       # max sleep time between 2 crawl of the same site
+my $RANDOM_AGENT    = $cfg->param('random_agent');          # activate simulation of a random browser name (better)
+my $RANDOM_SLEEP    = $cfg->param('random_sleep');          # active sleep during a random period of time between 2 crawl of the same site
+my $MIN_TIME_SLEEP  = $cfg->param('min_time_sleep');        # min sleep time between 2 crawl of the same site
+my $MAX_TIME_SLEEP  = $cfg->param('max_time_sleep');        # max sleep time between 2 crawl of the same site
 
 
 # prepare the JSON msg
@@ -143,7 +143,10 @@ print $json_response;
 ######################################
 sub my_get {
     my ($ua, $url_page)= @_;
+    my $cookies=new HTTP::Cookies(file=>'./cookies.dat',autosave=>1);
+    $ua->cookie_jar($cookies);
     my $res = $ua->get($url_page);
+
     my $count = 5;
     while ($res->code==500) {
         my $sleep_time = int(rand($MAX_TIME_SLEEP-$MIN_TIME_SLEEP))+$MIN_TIME_SLEEP;
