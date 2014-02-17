@@ -5,12 +5,6 @@
 # removes sources to webso from id
 #
 # inputs:
-#   - source_url :              string  @todo
-#   - source_type:              string  @todo
-#   - source_user:              string  @todo
-#   - source_level_sharing :    int     @todo
-#   - id:                       string
-
 # Contributors:
 #   - Arnaud Gaudinat : 23/07/2013
 ######################################################################

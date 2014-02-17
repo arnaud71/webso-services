@@ -21,10 +21,12 @@ use Log::Log4perl qw(:easy);
 use Config::Simple;
 use JSON;
 use LWP::UserAgent;
+use CGI;
 
 
 my $cfg = new Config::Simple('../../webso.cfg');
 my $webso_services = $cfg->param('webso_services');
+my $q               = CGI->new;
 
 
 my $RANDOM_SLEEP    = $cfg->param('random_sleep');          # active sleep during a random period of time between 2 crawl of the same site
@@ -56,9 +58,15 @@ my $datetime    = q{}; # string to keep local time for each crawl
 my $nb          = 0;
 
 
-my $url     = 'http://feeds.feedburner.com/bitem/news';
+
 my $json    = JSON->new->allow_nonref;
 
+if ($q->param('url')) {
+        $url    = $q->param('url');
+}
+else {
+    $url     = 'http://feeds.feedburner.com/bitem/news';
+}
 
 if ($url eq q{} ) {
     get_logger("crawler")->trace("url to crawl is empty");
