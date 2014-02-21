@@ -35,15 +35,15 @@ foreach my $url (@tab_url) {
     my $response = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
 
     if ($cfg->param('debug')) {
-        print $webso_services.'harvester/fetcher_run.pl'.$params."\n";
+        #print $webso_services.'harvester/fetcher_run.pl'.$params."\n";
     }
 
     my $r_json;
     if ($response->is_success) {
         $r_json = $json->decode( $response->decoded_content);
         if ($cfg->param('debug')) {
-            print $webso_services.'harvester/fetcher_run.pl'.$params."\n";
-            print $$r_json{content};
+            #print $webso_services.'harvester/fetcher_run.pl'.$params."\n";
+            #print $$r_json{content};
         }
     }
     else {

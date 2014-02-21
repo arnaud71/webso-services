@@ -8,4 +8,5 @@ Perl required module from CPAN
     install URI::Encode
     install Data::Dump
     install Config::Simple
+    install CHI
 
