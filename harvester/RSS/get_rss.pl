@@ -99,7 +99,7 @@ if (($response->is_success) || ($response->is_redirect)) {
         # get meta-info from RSS
         my $link    = $item->link();
         if ($debug) {
-                print $link."\n";
+                #print $link."\n";
         }
         # if google news rss clean the link
         $link =~ s/http:\/\/news\.google\.com\/(.*?)&url=(.*?)/$2/;
@@ -139,7 +139,8 @@ if (($response->is_success) || ($response->is_redirect)) {
             $link = clean_url($link);
 
             my $params = '?url='.$link;
-            my $res_link    = my $response = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
+            my $res_link    = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
+            my $r_json_link = $json->decode( $response->decoded_content);
 
 
             if ($res_link->code == 403) {       # stop if access denied
@@ -157,14 +158,18 @@ if (($response->is_success) || ($response->is_redirect)) {
                 'rss'
             );
 
-            if ($RANDOM_SLEEP) {
+            #print $$r_json_link{cached}."\n";
+
+            if (($$r_json_link{cached} eq 'false') &&  ($RANDOM_SLEEP)) {
                 my $sleep_time = int(rand($MAX_TIME_SLEEP-$MIN_TIME_SLEEP))+$MIN_TIME_SLEEP;
                 sleep($sleep_time);
+                #print "wait!!\n";
+
             }
 
-            my $r_json_link;
+
             if (($res_link->is_success) || ($res_link->is_redirect)){
-                $r_json_link = $json->decode( $response->decoded_content);
+
                 #print $$r_json_link{content}
                 my $h;
                 $$h{link}       = $link;
