@@ -30,7 +30,7 @@ use CGI;
 
 #### init
 
-my $cfg = new Config::Simple('../webso.cfg');
+my $cfg = new Config::Simple('../../webso.cfg');
 
 my $q               = CGI->new;
 # prepare the JSON msg
@@ -91,6 +91,8 @@ if ($USE_PROXY) {
     $ua->proxy(['http'], $PROXY);
 }
 
+#$url = 'http://news.google.com/news?cf=all&ned=us&hl=en&topic=tc&output=rss';
+
 my $url_page = $url;
 
 my $response = my $res = $ua->get($url_page);
@@ -98,6 +100,13 @@ my $response = my $res = $ua->get($url_page);
 my $c = 0;
 if ($response->is_success) {
     my $feed = XML::FeedPP->new($response->content);
+
+    $perl_response{'title'}         = $feed->title();
+    $perl_response{'description'}   = $feed->description();
+    $perl_response{'date'}          = $feed->pubDate();
+    #$feed->copyright( $text );
+    #$feed->link( $url );
+    $perl_response{'lang'}          = $feed->language();
 
     foreach my $item ( $feed->get_item() ) {
         my $link    = $item->link();

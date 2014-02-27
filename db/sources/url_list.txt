@@ -1,3 +1,4 @@
+http://www.upmc.fr/fr/rss.xml
 http://news.google.com/news?cf=all&ned=us&hl=en&topic=m&output=rss
 http://www.infonet-economy.ch/rss/fr/publications
 http://www.infonet-economy.ch/rss/fr/news
@@ -19,6 +20,8 @@ http://www.plos.org/feed/
 http://toxsci.oxfordjournals.org/rss/current.xml
 http://rss.sciencedirect.com/publication/science/271625
 http://www.ssrc.org/feed/
+http://rss.lemonde.fr/c/205/f/3061/index.rss
+
 
 
 

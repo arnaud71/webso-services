@@ -55,7 +55,7 @@ my $cache = CHI->new( driver => 'File',
 my $q   = CGI->new;
 my $url = q{};
 
-#$url = 'http://bitem.hesge.ch';
+$url = 'http://bitem.hesge.ch';
 
 
 if ($q->param('url')) {

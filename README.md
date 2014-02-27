@@ -9,4 +9,6 @@ Perl required module from CPAN
     install Data::Dump
     install Config::Simple
     install CHI
+    install IO::Socket::INET
 
+It seems better to use perlbrew with MACOSX (else we notice a http response truncated)

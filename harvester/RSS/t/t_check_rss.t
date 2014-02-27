@@ -14,16 +14,16 @@ my @tab_url;
 # list of rss to test
 
 # feed buner
-push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
-push @tab_url,'http://feeds.feedburner.com/bitem/news';
+#push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
+#push @tab_url,'http://feeds.feedburner.com/bitem/news';
 # rss version 2.0 - google news
 push @tab_url,'http://news.google.com/?output=rss&q=technology';
 # rss google blog
 #push @tab_url,'http://www.google.com/search?q=shampoo%20hair&hl=en&tbm=blg&tbs=qdr:d&output=rss';
 # rss version 2.0 - delicious
-push @tab_url,'http://feeds.delicious.com/v2/rss/tag/technology';
+#push @tab_url,'http://feeds.delicious.com/v2/rss/tag/technology';
 # rss bing
-push @tab_url,'http://www.bing.com/search?q=technology&format=rss';
+#push @tab_url,'http://www.bing.com/search?q=technology&format=rss';
 # rss bing news
 #push @tab_url,'http://www.bing.com/news/search?q=shampoo&format=RSS';
 # rss yahoo blog

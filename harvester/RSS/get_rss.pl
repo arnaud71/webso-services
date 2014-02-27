@@ -66,7 +66,9 @@ if ($q->param('url')) {
 }
 else {
     $url     = 'http://feeds.feedburner.com/bitem/news';
+    $url     = 'http://www.nytimes.com/services/xml/rss/nyt/Technology.xml';
 }
+
 
 if ($url eq q{} ) {
     get_logger("crawler")->trace("url to crawl is empty");
@@ -121,17 +123,17 @@ if (($response->is_success) || ($response->is_redirect)) {
 
             if (!(defined $item->pubDate())) {
                 my $tm = localtime;
-                $str_date = sprintf("%04d-%02d-%02d' '%02d:%02d:%02d", $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
+                $str_date = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
             }
             else {
                 my $fmt     = DateTime::Format::RSS->new;
                 my $dt      = $fmt->parse_datetime($date_rss);
                 $str_date   = $fmt->format_datetime($dt);
-                $str_date =~ s/T/ /;
+                $str_date   .= 'Z';
             }
 
             my $tm = localtime;
-            $datetime = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
+            $datetime = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
 
             # new fetch
 
@@ -140,7 +142,7 @@ if (($response->is_success) || ($response->is_redirect)) {
 
             my $params = '?url='.$link;
             my $res_link    = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
-            my $r_json_link = $json->decode( $response->decoded_content);
+            my $r_json_link = $json->decode( $res_link->decoded_content);
 
 
             if ($res_link->code == 403) {       # stop if access denied

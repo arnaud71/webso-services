@@ -91,7 +91,8 @@ if ($q->param('callback')) {
     $callback   = $q->param('callback');
 }
 
-
+#$url = 'http://www.latimes.com/business/technology/la-fi-tn-woman-attacked-says-she-wont-stop-wearing-google-glass-20140225,0,1735801.story?track=rss';
+#$url = 'http://www.hon.ch';
 
 ###################
 
@@ -100,7 +101,6 @@ if ($RANDOM_AGENT) {
     $ua->agent(rand_ua("browsers"));
 }
 $ua->timeout(30);
-
 if ($USE_PROXY) {
     $ua->proxy(['http'], $PROXY);
 }
@@ -108,7 +108,7 @@ if ($USE_PROXY) {
 my $response = my_get($ua, $url);
 
 if (($response->is_success) || ($response->is_redirect)) {
-    $perl_response{'content'}   = $response->content;
+    $perl_response{'content'}   = $response->decoded_content;
     $perl_response{'code'}      = $response->code;
     $perl_response{'error'}     = 'none';
     get_logger("crawler")->trace("OK: $url");
