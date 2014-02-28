@@ -62,6 +62,27 @@ else {
         }
 
     }
+    if ($$cgi{$db_type} eq $cfg->param('t_validation')) {
+        $id = 'v_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add v_ for validation
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_document')) {
+        $id = 'd_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_report')) {
+        $id = 'r_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_user')) {
+        $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_folder')) {
+        $id = 'f_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_watch')) {
+        $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
+    }
+    
+    ## delete callback
+    delete $$cgi{'callback'};
 
     $$cgi{id} = $id;
 
