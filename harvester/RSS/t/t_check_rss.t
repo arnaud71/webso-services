@@ -15,9 +15,9 @@ my @tab_url;
 
 # feed buner
 #push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
-#push @tab_url,'http://feeds.feedburner.com/bitem/news';
+push @tab_url,'http://feeds.feedburner.com/bitem/news';
 # rss version 2.0 - google news
-push @tab_url,'http://news.google.com/?output=rss&q=technology';
+#push @tab_url,'http://news.google.com/?output=rss&q=technology';
 # rss google blog
 #push @tab_url,'http://www.google.com/search?q=shampoo%20hair&hl=en&tbm=blg&tbs=qdr:d&output=rss';
 # rss version 2.0 - delicious
@@ -46,7 +46,7 @@ foreach my $url (@tab_url) {
     my $response = $ua->get($webso_services.'harvester/RSS/check_rss.pl'.$params);
 
     if ($cfg->param('debug')) {
-        print $webso_services.'harvester/check_rss.pl'.$params."\n";
+        print $webso_services.'harvester/RSS/check_rss.pl'.$params."\n";
     }
 
     my $r_json;
@@ -73,3 +73,4 @@ foreach my $url (@tab_url) {
     ok($$r_json{count}>0, "number of links must be >0 and you get ".$$r_json{count});
 
 }
+

@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #######################################
 # check_crawl.pl
 #
@@ -67,7 +68,7 @@ my $response = $ua->get($webso_services.'db/get.pl'.$params);
 
 
 if ($response->is_success) {
-    #print $response->decoded_content;  # or whatever
+    print $response->decoded_content;  # or whatever
     my $r_json = $json->decode( $response->decoded_content);
     # check all services
     my $i = 0;

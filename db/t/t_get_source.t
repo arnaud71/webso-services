@@ -25,7 +25,7 @@ my $db_source_type          = $cfg->param('db_source_type');
 
 my %source = (
     $db_type             => 'source',
-    $db_user             => 'user_1',
+    $db_user             => 'user_0',
 );
 
 
@@ -46,7 +46,7 @@ my $params = '?'.$db_type.'='.$source{$db_type}
 my $response = $ua->get($webso_services.'db/get.pl'.$params);
 
 if ($response->is_success) {
-     print $response->decoded_content;  # or whatever
+     #print $response->decoded_content;  # or whatever
 
      my $r_json = $json->decode( $response->decoded_content);
 

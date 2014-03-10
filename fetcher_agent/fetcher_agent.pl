@@ -103,6 +103,10 @@ if ($RANDOM_AGENT) {
 $ua->timeout(30);
 if ($USE_PROXY) {
     $ua->proxy(['http'], $PROXY);
+    $ENV{HTTPS_PROXY} = 'proxyem.etat-ge.ch:80';
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0;
+    $ENV{"HTTPS_PROXY_USERNAME"} = 'zzrodin';
+    $ENV{"HTTPS_PROXY_PASSWORD"} = 'as789HGI1';
 }
 
 my $response = my_get($ua, $url);

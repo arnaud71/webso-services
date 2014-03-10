@@ -60,7 +60,7 @@ sub push_url {
     my $json            = JSON->new->allow_nonref;
 
     my $rss_res = RssInterface::check_rss($url);
-
+    print STDERR "$url has been checked, count is ".$$rss_res{count}. "\n";
     if ($$rss_res{count}>0) {
         my $encoded = $uri->encode($url);
 
@@ -108,7 +108,7 @@ sub push_source {
         print $response->decoded_content;        #$perl_response{success} = $json->decode( $response->decoded_content);  # or whatever
     }
     else {
-        print 'source server or service: '.$response->code."\n";
+        print 'push of '.dd($req)." ".$response->code."\n";
         #$perl_response{'error'} = 'sources server or service: '.$response->code;
 
     }

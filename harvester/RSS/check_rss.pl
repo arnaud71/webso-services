@@ -41,11 +41,14 @@ my %perl_response   = ();
 
 ################ CRAWLER CONST ###########
 
-my $RANDOM_AGENT    = 1;       # activate simulation of a random browser name (better)
-my $USE_PROXY       = 0;
+my $webso_services  = $cfg->param('webso_services');
+my $USE_PROXY       = $cfg->param('use_proxy');
+my $PROXY           = $cfg->param('proxy');
 
-my $PROXY           = $ResipiConfig::proxy;
-
+my $RANDOM_AGENT    = $cfg->param('random_agent');          # activate simulation of a random browser name (better)
+my $RANDOM_SLEEP    = $cfg->param('random_sleep');          # active sleep during a random period of time between 2 crawl of the same site
+my $MIN_TIME_SLEEP  = $cfg->param('min_time_sleep');        # min sleep time between 2 crawl of the same site
+my $MAX_TIME_SLEEP  = $cfg->param('max_time_sleep');        # max sleep time between 2 crawl of the same site
 
 
 # get params
@@ -89,9 +92,13 @@ $ua->timeout(30);
 #$ua->env_proxy;
 if ($USE_PROXY) {
     $ua->proxy(['http'], $PROXY);
+    $ENV{HTTPS_PROXY} = 'proxyem.etat-ge.ch:80';
+    $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0;
+    $ENV{"HTTPS_PROXY_USERNAME"} = 'zzrodin';
+    $ENV{"HTTPS_PROXY_PASSWORD"} = 'as789HGI1'; 
 }
 
-#$url = 'http://news.google.com/news?cf=all&ned=us&hl=en&topic=tc&output=rss';
+#$url = 'http://feeds.feedburner.com/bitem/news';
 
 my $url_page = $url;
 
