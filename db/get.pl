@@ -53,7 +53,13 @@ else {
 
 
     foreach my $k (keys %$cgi) {
-        if ($k ne 'callback') {
+        if ($k eq 'rows') {
+            $query .= '&rows='.$$cgi{$k};
+        }
+        elsif ($k eq 'start') {
+                    $query .= '&start='.$$cgi{$k};
+                }
+        elsif ($k ne 'callback') {
             $query .= '&fq='.$k.':'.$$cgi{$k};
         }
     }
@@ -77,6 +83,7 @@ else {
 
         my $json_text   = $json->pretty->encode($cgi);
 
+
         # concatenate query and response
         %perl_response = (%perl_response,%$cgi);
 
@@ -91,7 +98,6 @@ else {
 
         #my $response = $ua->request($req);
 
- 
 
         my  $query_encoded = uri_encode(
             'collection1/select?q=*:*'
@@ -100,9 +106,11 @@ else {
 
 
         my $response = $ua->get($cfg->param('ws_db').$query_encoded);
+
  
         if ($response->is_success) {
-            $perl_response{success} = $json->decode( $response->decoded_content);  # or whatever
+            $perl_response{success} = $json->decode( $response->content);  # or whatever
+
      
         }
         else {
@@ -119,7 +127,7 @@ my $json_response   = $json->pretty->encode(\%perl_response);
 if ($callback) { 
     print 'Access-Control-Allow-Origin: *';
     print 'Access-Control-Allow-Methods: GET'; 
-    print "Content-type: application/javascript\n\n";
+    print "Content-type: application/javascript; charset=utf-8\n\n";
     $json_response   = $callback.'('.$json_response.');';
 } else { 
     # Header for access via browser, curl, etc. 

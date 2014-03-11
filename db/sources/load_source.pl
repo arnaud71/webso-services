@@ -41,7 +41,7 @@ $ua->timeout(10);
 $ua->env_proxy;
 
 
-open(IN,'url_list.txt');
+open(IN,$ARGV[0]);
 
     use URI::Encode;
     my $uri     = URI::Encode->new( { encode_reserved => 0 } );
