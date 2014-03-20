@@ -16,6 +16,8 @@ my @tab_url;
 # feed buner
 #push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
 push @tab_url,'http://feeds.feedburner.com/bitem/news';
+push @tab_url,'http://www.tdg.ch/high-tech/rss.html';
+
 # rss version 2.0 - google news
 #push @tab_url,'http://news.google.com/?output=rss&q=technology';
 # rss google blog

@@ -32,13 +32,26 @@ use URI::Encode qw(uri_encode uri_decode);
 use JSON;
 use CGI;
 use CHI;
+use Log::Log4perl qw(:easy);
 
 
-print "Content-type: application/json\n\n";
+print "Content-type: application/json; charset=utf-8\n\n";
 my $json    = JSON->new->allow_nonref;
 
 my $cfg = new Config::Simple('../webso.cfg');
 my $webso_services = $cfg->param('webso_services');
+
+
+my $logconf = "
+    log4perl.logger.crawler                         = TRACE, crawlerAppender
+    log4perl.appender.crawlerAppender               = Log::Log4perl::Appender::File
+    log4perl.appender.crawlerAppender.filename      = ".$cfg->param('log_dir')."cache.log
+    log4perl.appender.crawlerAppender.layout        = PatternLayout
+    log4perl.appender.crawlerAppender.layout.ConversionPattern=%d - %m{chomp}%n
+
+";
+Log::Log4perl::init(\$logconf);
+
 
 # init the cache dir
 my $cache_fetcher_dir   = $cfg->param('cache_fetcher_dir');
@@ -55,7 +68,7 @@ my $cache = CHI->new( driver => 'File',
 my $q   = CGI->new;
 my $url = q{};
 
-$url = 'http://bitem.hesge.ch';
+$url = 'http://www.lemonde.fr/a-la-une/article/2014/03/15/sfr-l-ingerence-inopportune-de-l-etat_4383690_3208.html';
 
 
 if ($q->param('url')) {
@@ -87,13 +100,13 @@ if ( (!$cache_option) || (!defined $res_content) ) {
 
 
     if ($response->is_success) {
-        $r_json = $json->decode( $response->decoded_content);
+        $r_json = $json->decode( $response->content);
         if ($cfg->param('debug')) {
             #print $webso_services.'fetcher_agent/fetcher_agent.pl'.$params."\n";
             #print $$r_json{content};
         }
         $$r_json{cached} = 'false';
-        $cache->set( $url_encoded, $response->decoded_content);
+        $cache->set( $url_encoded, $response->content);
 
     }
     else {
@@ -103,6 +116,7 @@ if ( (!$cache_option) || (!defined $res_content) ) {
 else {
    $r_json = $json->decode( $res_content);
    $$r_json{cached} = 'true';
+   get_logger("crawler")->trace("CACHEOK: $url");
 }
 
 

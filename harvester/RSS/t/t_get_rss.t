@@ -12,7 +12,8 @@ use Data::Dump qw(dd);
 
 my @tab_url;
 
-push @tab_url,'http://feeds.feedburner.com/bitem/news';
+#push @tab_url,'http://feeds.feedburner.com/bitem/news';
+push @tab_url,'http://www.tdg.ch/high-tech/rss.html';
 
 my $json    = JSON->new->allow_nonref;
 

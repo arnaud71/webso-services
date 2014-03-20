@@ -13,7 +13,7 @@ my @tab_url;
 # list of url to test
 push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
 push @tab_url,'http://feeds.feedburner.com/bitem/news';
-#push @tab_url,'https://www.hon.ch';
+
 
 
 my $json    = JSON->new->allow_nonref;
@@ -59,5 +59,6 @@ foreach my $url (@tab_url) {
     # test if content>1000 char
 
     ok(length($$r_json{content})>1000, "length of content should be greater than 1000 char");
+
 
 }

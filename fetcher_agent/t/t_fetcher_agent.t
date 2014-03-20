@@ -14,11 +14,11 @@ my @tab_url;
 
 
 # list of url to test
-push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
-push @tab_url,'http://feeds.feedburner.com/bitem/news';
+#push @tab_url,'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology';
+#push @tab_url,'http://feeds.feedburner.com/bitem/news';
 #push @tab_url,'https://www.hon.ch';
-push @tab_url,'http://gigaom.com/2011/05/09/kinect-skype-video-calling-magic/?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+OmMalik+%28GigaOM%3A+Tech%29&utm_content=Google+Reader';
-
+#push @tab_url,'http://gigaom.com/2011/05/09/kinect-skype-video-calling-magic/?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+OmMalik+%28GigaOM%3A+Tech%29&utm_content=Google+Reader';
+push @tab_url,'http://www.lemonde.fr/a-la-une/article/2014/03/15/sfr-l-ingerence-inopportune-de-l-etat_4383690_3208.html';
 
 
 my $json    = JSON->new->allow_nonref;
@@ -45,7 +45,8 @@ foreach my $url (@tab_url) {
 
     my $r_json;
     if ($response->is_success) {
-        $r_json = $json->decode( $response->decoded_content);
+        $r_json = $json->decode( $response->content);
+
         if ($cfg->param('debug')) {
             #print $webso_services.'fetcher_agent/fetcher_agent.pl'.$params."\n";
             #print $$r_json{content};
@@ -64,5 +65,6 @@ foreach my $url (@tab_url) {
     # test if content>1000 char
 
     ok(length($$r_json{content})>1000, "length of content should be greater than 1000 char");
+
 
 }

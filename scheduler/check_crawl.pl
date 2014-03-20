@@ -69,7 +69,7 @@ my $response = $ua->get($webso_services.'db/get.pl'.$params);
 
 if ($response->is_success) {
     print $response->decoded_content;  # or whatever
-    my $r_json = $json->decode( $response->decoded_content);
+    my $r_json = $json->decode( $response->content);
     # check all services
     my $i = 0;
     while ($r_json->{success}{response}{docs}[$i]) {
@@ -88,19 +88,23 @@ if ($response->is_success) {
 
         if ($res_rss->is_success) {
 
-            $r_json_rss = $json->decode( $res_rss->decoded_content);
+            $r_json_rss = $json->decode( $res_rss->content);
+
+
 
             foreach my $h (@{$r_json_rss->{items}} ) {
-                #print $$h{content}."\n";exit;
+
                 print STDERR $$h{link}."\n";
                 my $main_content    = extract_tika_content(\$$h{content});
-                #print $main_content."\n";
+                utf8::encode($main_content);
+
                 my $lang    = extract_tika_lang(\$$h{content});
                 #print $lang."\n";
 
                 #print dd($h);exit;
 
                 if ($main_content) {
+
                     my $doc = {
                         id          => 'd_'.md5_hex($$doc{user_s}.$$h{link}),
                         date_dt     => $$h{date},
@@ -116,6 +120,7 @@ if ($response->is_success) {
                         title_fr    => $$h{title},
                         lang_s      => $lang
                     };
+
                     push_doc($json->encode($doc));
                 }
                 else {
@@ -146,6 +151,8 @@ if ($response->is_success) {
 sub extract_tika_content{
     my ($data) = shift @_;
 
+
+
     #print $$data;
     #  We call IO::Socket::INET->new() to create the UDP Socket
     # and bind with the PeerAddr.
@@ -156,6 +163,7 @@ sub extract_tika_content{
         Proto       => 'tcp'
     ) or die "ERROR in Socket Creation : $!\n";
     #send operation
+
 
     my $size = $socket->send($$data);
     #print "sent data of length $size\n";
@@ -172,6 +180,7 @@ sub extract_tika_content{
     }
 
     close($socket);
+    utf8::decode($content);
     return $content;
 }
 
@@ -215,20 +224,24 @@ sub push_doc {
 
     my $json_text = shift @_;
 
+
     #print $json_text;
 
     my $req = HTTP::Request->new(
         POST => $cfg->param('ws_db').'update'
     );
 
-    $req->content_type('application/json');
+    $req->content_type('application/json;charset=utf-8');
+
+
+
     $req->content('['.$json_text.']');
 
     my $response = $ua->request($req);
 
 
     if ($response->is_success) {
-        print $response->decoded_content;
+        print $response->content;
         #$perl_response{success} = $json->decode( $response->decoded_content);  # or whatever
 
     }

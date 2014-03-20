@@ -65,8 +65,7 @@ if ($q->param('url')) {
         $url    = $q->param('url');
 }
 else {
-    $url     = 'http://feeds.feedburner.com/bitem/news';
-    $url     = 'http://www.nytimes.com/services/xml/rss/nyt/Technology.xml';
+    $url     = 'http://www.tdg.ch/high-tech/rss.html';
 }
 
 
@@ -89,7 +88,7 @@ $$final_json{error} = 'none';
 
 if (($response->is_success) || ($response->is_redirect)) {
     $$final_json{url} = $url;
-    $r_json = $json->decode( $response->decoded_content);
+    $r_json = $json->decode( $response->content);
     get_logger("crawler")->trace("$url type RSS fetched");
     #################### type RSS   #########
 
@@ -101,7 +100,7 @@ if (($response->is_success) || ($response->is_redirect)) {
         # get meta-info from RSS
         my $link    = $item->link();
         if ($debug) {
-                #print $link."\n";
+                print STDERR $link."\n";
         }
         # if google news rss clean the link
         $link =~ s/http:\/\/news\.google\.com\/(.*?)&url=(.*?)/$2/;
@@ -142,7 +141,7 @@ if (($response->is_success) || ($response->is_redirect)) {
 
             my $params = '?url='.$link;
             my $res_link    = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
-            my $r_json_link = $json->decode( $res_link->decoded_content);
+            my $r_json_link = $json->decode( $res_link->content);
 
 
             if ($res_link->code == 403) {       # stop if access denied
@@ -184,6 +183,7 @@ if (($response->is_success) || ($response->is_redirect)) {
                 $c++;
             }
         }
+        #last; #stop on first item
     } #end foreach
     $$final_json{items} = \@tab_res;
     $$final_json{count} = $c;
@@ -200,11 +200,11 @@ my $json_response   = $json->pretty->encode($final_json);
 if ($callback) {
     print 'Access-Control-Allow-Origin: *';
     print 'Access-Control-Allow-Methods: GET';
-    print "Content-type: application/javascript\n\n";
+    print "Content-type: application/javascript; charset=utf-8\n\n";
     $json_response   = $callback.'('.$json_response.');';
 } else {
     # Header for access via browser, curl, etc.
-    print "Content-type: application/json\n\n";
+    print "Content-type: application/json; charset=utf-8\n\n";
 }
 
 print $json_response;

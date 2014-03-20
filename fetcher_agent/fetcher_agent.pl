@@ -92,7 +92,7 @@ if ($q->param('callback')) {
 }
 
 #$url = 'http://www.latimes.com/business/technology/la-fi-tn-woman-attacked-says-she-wont-stop-wearing-google-glass-20140225,0,1735801.story?track=rss';
-#$url = 'http://www.hon.ch';
+#$url = 'http://www.lemonde.fr/a-la-une/article/2014/03/15/sfr-l-ingerence-inopportune-de-l-etat_4383690_3208.html';
 
 ###################
 
@@ -112,7 +112,7 @@ if ($USE_PROXY) {
 my $response = my_get($ua, $url);
 
 if (($response->is_success) || ($response->is_redirect)) {
-    $perl_response{'content'}   = $response->decoded_content;
+    $perl_response{'content'}   = $response->content;
     $perl_response{'code'}      = $response->code;
     $perl_response{'error'}     = 'none';
     get_logger("crawler")->trace("OK: $url");
@@ -129,11 +129,11 @@ my $json_response   = $json->pretty->encode(\%perl_response);
 if ($callback) {
     print 'Access-Control-Allow-Origin: *';
     print 'Access-Control-Allow-Methods: GET';
-    print "Content-type: application/javascript\n\n";
+    print "Content-type: application/javascript; charset=utf-8\n\n";
     $json_response   = $callback.'('.$json_response.');';
 } else {
     # Header for access via browser, curl, etc.
-    print "Content-type: application/json\n\n";
+    print "Content-type: application/json; charset=utf-8\n\n";
 }
 
 print $json_response;
