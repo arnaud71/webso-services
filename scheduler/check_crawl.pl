@@ -97,6 +97,7 @@ if ($response->is_success) {
                 print STDERR $$h{link}."\n";
                 my $main_content    = extract_tika_content(\$$h{content});
                 utf8::encode($main_content);
+                $main_content =~s/$$h{title}//gs;
 
                 my $lang    = extract_tika_lang(\$$h{content});
                 #print $lang."\n";
