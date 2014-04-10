@@ -91,7 +91,6 @@ if ($response->is_success) {
             $r_json_rss = $json->decode( $res_rss->content);
 
 
-
             foreach my $h (@{$r_json_rss->{items}} ) {
 
                 print STDERR $$h{link}."\n";

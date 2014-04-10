@@ -18,6 +18,7 @@ use lib "..";
 use LWP::UserAgent;
 use Config::Simple;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
+use Time::localtime;
 
 
 my $q       = CGI->new;
@@ -39,9 +40,11 @@ my $cfg     = new Config::Simple('../webso.cfg');
 
 
 
-my $db_type = $cfg->param('db_type');
-my $db_user = $cfg->param('db_user');
-my $db_url  = $cfg->param('db_url');
+my $db_type             = $cfg->param('db_type');
+my $db_user             = $cfg->param('db_user');
+my $db_url              = $cfg->param('db_url');
+my $db_creation_date    = $cfg->param('db_creation_date');
+my $db_updating_date    = $cfg->param('db_updating_date');
 
 
 if (Config::Simple->error()) {
@@ -84,7 +87,17 @@ else {
     ## delete callback
     delete $$cgi{'callback'};
 
+    # add id
+
     $$cgi{id} = $id;
+
+    # add current date
+
+    my $tm = localtime;
+    my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
+
+    $$cgi{$db_creation_date} = $str_now;
+    $$cgi{$db_updating_date} = $str_now;
 
     my $json_text   = $json->pretty->encode($cgi);
 
