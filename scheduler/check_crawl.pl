@@ -14,6 +14,7 @@ use Data::Dump qw(dd);
 use IO::Socket::INET;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Log::Log4perl qw(:easy);
+use Time::localtime;
 
 
 my $json    = JSON->new->allow_nonref;
@@ -44,14 +45,7 @@ my $logconf = "
 Log::Log4perl::init(\$logconf);
 
 
-
-
-my %source = (
-    $db_type             => 'source',
-);
-
-
-my $test_data ='<html><body><h1>titre document</h1> et le reste <body></html>';
+#my $test_data ='<html><body><h1>titre document</h1> et le reste <body></html>';
 #extract_tika_content(\$test_data);
 #exit;
 
@@ -61,8 +55,7 @@ $ua->timeout(1000);
 $ua->env_proxy;
 
 #
-my $params = '?'.$db_type.'='.$source{$db_type}
-             ;
+my $params = '?'.$db_type.'=source';
 
 my $response = $ua->get($webso_services.'db/get.pl'.$params);
 
@@ -73,12 +66,12 @@ if ($response->is_success) {
     # check all services
     my $i = 0;
     while ($r_json->{success}{response}{docs}[$i]) {
-        my $doc = $r_json->{success}{response}{docs}[$i];
+        my $source = $r_json->{success}{response}{docs}[$i];
         #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
 
-        print $$doc{url_s}."\n";
+        print $$source{url_s}."\n";
 
-        my $params = '?url='.$$doc{url_s};
+        my $params = '?url='.$$source{url_s};
 
 
         my $res_rss = $ua->get($webso_services.'harvester/RSS/get_rss.pl'.$params);
@@ -90,6 +83,7 @@ if ($response->is_success) {
 
             $r_json_rss = $json->decode( $res_rss->content);
 
+            #dd($r_json_rss);exit;
 
             foreach my $h (@{$r_json_rss->{items}} ) {
 
@@ -98,6 +92,13 @@ if ($response->is_success) {
                 utf8::encode($main_content);
                 $main_content =~s/$$h{title}//gs;
 
+                my $meta_flag = 'false';
+                # if not enough take the content from meta instead of crawling
+                if ((length($main_content)<20) && (length($$h{meta_content})>19)) {
+                    $main_content   = $$h{meta_content};
+                    $meta_flag      = 'true';
+                }
+
                 my $lang    = extract_tika_lang(\$$h{content});
                 #print $lang."\n";
 
@@ -105,20 +106,28 @@ if ($response->is_success) {
 
                 if ($main_content) {
 
+                    my $tm = localtime;
+                    my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
+
+
                     my $doc = {
-                        id          => 'd_'.md5_hex($$doc{user_s}.$$h{link}),
-                        date_dt     => $$h{date},
-                        url_s       => $$h{link},
-                        user_s      => $$doc{user_s},
-                        content_en  => $main_content,
-                        content_fr  => $main_content,
-                        content_t   => $main_content,
-                        raw_s       => $$h{content},
-                        type_s      => 'document',
-                        title_t     => $$h{title},
-                        title_en    => $$h{title},
-                        title_fr    => $$h{title},
-                        lang_s      => $lang
+                        id              => 'd_'.md5_hex($$source{user_s}.$$h{link}),
+                        date_dt         => $$h{date},
+                        url_s           => $$h{link},
+                        user_s          => $$source{user_s},
+                        content_en      => $main_content,
+                        content_fr      => $main_content,
+                        content_t       => $main_content,
+                        raw_s           => $$h{content},
+                        type_s          => 'document',
+                        title_t         => $$h{title},
+                        title_en        => $$h{title},
+                        title_fr        => $$h{title},
+                        lang_s          => $lang,
+                        source_id_ss    => $$source{id},
+                        meta_flag_b     => $meta_flag,
+                        creation_dt     => $str_now,
+                        updating_dt     => $str_now
                     };
 
                     push_doc($json->encode($doc));
@@ -147,11 +156,14 @@ if ($response->is_success) {
      die $response->status_line;
 }
 
-
+##############################
+# extract_tika_content
+#
+#   input: raw html
+#   output: relevant text
+##############################
 sub extract_tika_content{
     my ($data) = shift @_;
-
-
 
     #print $$data;
     #  We call IO::Socket::INET->new() to create the UDP Socket
@@ -184,7 +196,12 @@ sub extract_tika_content{
     return $content;
 }
 
-
+##############################
+# extract_tika_lang
+#
+#   input: raw html
+#   output: detected language of the content
+##############################
 sub extract_tika_lang{
     my ($data) = shift @_;
 
@@ -220,6 +237,12 @@ sub extract_tika_lang{
 }
 
 
+##############################
+# push_doc
+#
+#   input: doc in json
+#   output: response code and/or error msg
+##############################
 sub push_doc {
 
     my $json_text = shift @_;

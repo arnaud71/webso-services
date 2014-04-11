@@ -60,8 +60,8 @@ else {
     # if source type
     if ($$cgi{$db_type} eq $cfg->param('t_source')) {
         $id = 's_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add s_ for source
-        if ($$cgi{refresh_rate}) {
-            $$cgi{refresh_rate} = (60 * 23); # default rate each 23h
+        if ($$cgi{refresh_rate_s}) {
+            $$cgi{refresh_rate_s} = '12h'; # default rate each 23h
         }
 
     }

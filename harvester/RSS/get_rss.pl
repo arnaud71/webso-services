@@ -22,6 +22,7 @@ use Config::Simple;
 use JSON;
 use LWP::UserAgent;
 use CGI;
+use HTML::Restrict;
 
 
 my $cfg = new Config::Simple('../../webso.cfg');
@@ -65,7 +66,7 @@ if ($q->param('url')) {
         $url    = $q->param('url');
 }
 else {
-    $url     = 'http://www.tdg.ch/high-tech/rss.html';
+    $url     = 'http://rss.feedsportal.com/c/32535/f/481792/index.rss';
 }
 
 
@@ -116,6 +117,15 @@ if (($response->is_success) || ($response->is_redirect)) {
         }
         if ($link !~/mp3$/) {
             my $title   = $item->title();
+
+            my $meta_content  = $item->description();  #http::strip doesn't support utf8
+            # clean html
+            my $hs = HTML::Restrict->new();
+            $meta_content = $hs->process($meta_content);
+
+
+
+
             # get the date from RSS
             my $date_rss = $item->pubDate();
             my $str_date = q{};
@@ -150,14 +160,6 @@ if (($response->is_success) || ($response->is_redirect)) {
             }
 
 
-            # if fetch OK we add meta
-            add_meta(
-                $link,
-                $url,    #url of the job
-                $title,
-                $str_date,
-                'rss'
-            );
 
             #print $$r_json_link{cached}."\n";
 
@@ -173,12 +175,13 @@ if (($response->is_success) || ($response->is_redirect)) {
 
                 #print $$r_json_link{content}
                 my $h;
-                $$h{link}       = $link;
-                $$h{title}      = $title;
-                $$h{date}       = $str_date;
-                $$h{content}    = $$r_json_link{content};
-                $$h{code_link}  = $$r_json_link{code};
-                $$h{error_link} = $$r_json_link{error};
+                $$h{link}           = $link;
+                $$h{title}          = $title;
+                $$h{meta_content}   = $meta_content;
+                $$h{date}           = $str_date;
+                $$h{content}        = $$r_json_link{content};
+                $$h{code_link}      = $$r_json_link{code};
+                $$h{error_link}     = $$r_json_link{error};
                 push @tab_res, $h;
                 $c++;
             }
