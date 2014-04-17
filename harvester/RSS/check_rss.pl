@@ -26,6 +26,8 @@ use Time::localtime;
 use Log::Log4perl qw(:easy);
 use Config::Simple;
 use JSON;
+use HTML::Restrict;
+use HTML::Entities;
 use CGI;
 
 #### init
@@ -108,6 +110,7 @@ my $c = 0;
 if ($response->is_success) {
     my $feed = XML::FeedPP->new($response->content);
 
+
     $perl_response{'title'}         = $feed->title();
     $perl_response{'description'}   = $feed->description();
     $perl_response{'date'}          = $feed->pubDate();
@@ -116,8 +119,22 @@ if ($response->is_success) {
     $perl_response{'lang'}          = $feed->language();
 
     foreach my $item ( $feed->get_item() ) {
-        my $link    = $item->link();
-        push @{$perl_response{'links'}},$link;
+        my $link        = $item->link();
+        my $title       = $item->title();
+        my $description = $item->description();
+
+        my $hs = HTML::Restrict->new();
+        $description = $hs->process($description);
+        decode_entities($description);
+
+        my $date        = $item->pubDate();
+        my %items;
+        $items{link}         = $link;
+        $items{title}        = $title;
+        $items{description}  = $description;
+        $items{date}         = $date;
+        push @{$perl_response{'items'}},\%items;
+
         $c++;
     }
     $perl_response{'count'} = $c;

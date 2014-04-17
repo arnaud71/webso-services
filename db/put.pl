@@ -122,7 +122,7 @@ else {
 
 
     if ($response->is_success) {
-        $perl_response{success} = $json->decode( $response->decoded_content);  # or whatever
+        $perl_response{success} = $json->decode( $response->content);  # or whatever
      
     }
     else {

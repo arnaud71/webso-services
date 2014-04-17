@@ -84,7 +84,7 @@ if ($response->is_success) {
             $r_json_rss = $json->decode( $res_rss->content);
 
             #dd($r_json_rss);exit;
-
+            my $num_doc = 0;
             foreach my $h (@{$r_json_rss->{items}} ) {
 
                 print STDERR $$h{link}."\n";
@@ -131,6 +131,7 @@ if ($response->is_success) {
                     };
 
                     push_doc($json->encode($doc));
+
                 }
                 else {
                     get_logger("crawler")->trace("ERROR: tika content extration empty".$$h{link});
@@ -273,6 +274,12 @@ sub push_doc {
         #$perl_response{'error'} = 'sources server or service: '.$response->code;
 
     }
+
+
+}
+
+
+sub check_watch {
 
 
 }
