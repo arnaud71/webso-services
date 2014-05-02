@@ -49,6 +49,8 @@ else {
 	my $db_user 	= $$cgi{'user_s'};
 	my $pass 	= $$cgi{'password_s'};
 	my $db_password	= md5_hex($pass);
+	my $db_creation_dt;
+	my $db_updating_dt;
 
 	$query 	= 'q='.'user_s:'.$db_user. ' AND password_s:'.$db_password;
 
@@ -86,6 +88,8 @@ else {
 		 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
 		 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 				$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};	
+				$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
+				$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
 					
 				# - faire un POST sur le "JETON" sur le user en cours
 				#	en le remettant à "FALSE" et remettre le compteur de sessions a 0
@@ -96,6 +100,8 @@ else {
 				$$cgi{"role_s"}	= $db_role;
 				$$cgi{"compteur_sessions_s"} = 0;
 				$$cgi{"type_s"} = 'enregistrement';
+				$$cgi{"creation_dt"} = $db_creation_dt;
+				$$cgi{"updating_dt"} = $db_updating_dt;
 
 				my $json_text   = $json->pretty->encode($cgi);
 
