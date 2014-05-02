@@ -40,11 +40,15 @@ my $cfg     = new Config::Simple('../webso.cfg');
 
 
 
-my $db_type             = $cfg->param('db_type');
-my $db_user             = $cfg->param('db_user');
-my $db_url              = $cfg->param('db_url');
-my $db_creation_date    = $cfg->param('db_creation_date');
-my $db_updating_date    = $cfg->param('db_updating_date');
+my $db_type                 = $cfg->param('db_type');
+my $db_user                 = $cfg->param('db_user');
+my $db_password             = $cfg->param('db_password');
+my $db_role                 = $cfg->param('db_role');
+my $db_compteur_sessions    = $cfg->param('db_compteur_sessions');
+my $db_jeton                = $cfg->param('db_jeton');
+my $db_url                  = $cfg->param('db_url');
+my $db_creation_date        = $cfg->param('db_creation_date');
+my $db_updating_date        = $cfg->param('db_updating_date');
 
 
 if (Config::Simple->error()) {
@@ -67,6 +71,11 @@ else {
     }
     if ($$cgi{$db_type} eq $cfg->param('t_validation')) {
         $id = 'v_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add v_ for validation
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_enregistrement')) {
+        $id = 'e_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password}); #add e_ for user
+        $$cgi{$db_password} = md5_hex($$cgi{$db_password});
+        $$cgi{$db_role} = $$cgi{$db_role};
     }
     if ($$cgi{$db_type} eq $cfg->param('t_document')) {
         $id = 'd_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #
