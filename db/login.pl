@@ -45,6 +45,8 @@ else {
 	my $db_jeton;
 	my $db_compteur_sessions;
 	my $db_role;
+	my $db_creation_dt;
+	my $db_updating_dt;
 
 	my $query 	= q{};
 	my $db_user 	= $$cgi{'user_s'};
@@ -91,7 +93,7 @@ else {
 			.'&wt=json&indent=true');
 						
 			$response_2 = $ua->get($cfg->param('ws_db').$query_encoded_2);
-			my $response_text = $json->decode($response_1->decoded_content);				
+			my $response_text = $json->decode($response_2->decoded_content);				
 
 			if ($response_2->is_success) {
 				if($response_text->{response}->{numFound} eq 1){
@@ -102,6 +104,8 @@ else {
 			 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
 			 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 					$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};	
+					$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
+					$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
 			 			        		
 					# - faire un POST sur "compteur_sessions" sur le user en cours
 					#	en l'incrementant de 1
@@ -112,6 +116,8 @@ else {
 					$$cgi{"role_s"} 		= $db_role;
 					$$cgi{"compteur_sessions_s"} 	= $db_compteur_sessions + 1;
 					$$cgi{"type_s"} 		= 'enregistrement';
+					$$cgi{"creation_dt"} = $db_creation_dt;
+					$$cgi{"updating_dt"} = $db_updating_dt;
 
 					my $json_text   = $json->pretty->encode($cgi);
 
@@ -134,6 +140,8 @@ else {
 							$$cgi{"jeton_s"} = 'true';
 							$$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
 							$$cgi{"type_s"} = 'enregistrement';
+							$$cgi{"creation_dt"} = $db_creation_dt;
+							$$cgi{"updating_dt"} = $db_updating_dt;
 
 							my $json_text   = $json->pretty->encode($cgi);
 
