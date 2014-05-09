@@ -66,7 +66,7 @@ if ($q->param('url')) {
         $url    = $q->param('url');
 }
 else {
-    $url     = 'http://rss.feedsportal.com/c/32535/f/481792/index.rss';
+    $url     = 'http://news.google.com/news?pz=1&cf=all&ned=fr_ch&hl=fr&output=rss&q=iphone';
 }
 
 
