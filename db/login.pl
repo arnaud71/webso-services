@@ -43,7 +43,7 @@ else {
 	my $deb_mod = $cfg->param('debug');
 	my $id;
 	my $db_jeton;
-	my $db_compteur_sessions;
+#	my $db_compteur_sessions;
 	my $db_role;
 	my $db_creation_dt;
 	my $db_updating_dt;
@@ -85,28 +85,31 @@ else {
 	$response_1 = $ua->get($cfg->param('ws_db').$query_encoded_1);
 	my $response_text = $json->decode($response_1->decoded_content);
 
-        if ($response_1->is_success) {
+	if ($response_1->is_success) {
 		if($response_text->{response}->{numFound} eq 1){
+
 			$query_encoded_2 = uri_encode(
 			"collection1/select?"
-			.$query.' AND jeton_s:false'
+			.$query. ' AND jeton_s:false'
 			.'&wt=json&indent=true');
 						
-			$response_2 = $ua->get($cfg->param('ws_db').$query_encoded_2);
+			$response_2 = $ua->get($cfg->param('ws_db').$query_encoded_1);
 			my $response_text = $json->decode($response_2->decoded_content);				
 
 			if ($response_2->is_success) {
-				if($response_text->{response}->{numFound} eq 1){
+#				if($response_text->{response}->{numFound} eq 1){
 					## delete callback
 					delete $$cgi{'callback'};
 
+
 					$id			= $response_text->{response}->{docs}[0]->{"id"};   		
 			 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
-			 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
+#			 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 					$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};	
 					$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
 					$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
-			 			        		
+
+=pod			 			        		
 					# - faire un POST sur "compteur_sessions" sur le user en cours
 					#	en l'incrementant de 1
 					$$cgi{"id"} 			= $id;
@@ -131,6 +134,7 @@ else {
 
 					if ($response_3->is_success) {
 						if($$cgi{"compteur_sessions_s"} eq 1){
+=cut
 							# - faire un POST sur le "JETON" sur le user en cours
 							#	en le remettant à "TRUE"
 							$$cgi{"id"} = $id;
@@ -138,7 +142,7 @@ else {
 							$$cgi{"password_s"} = $db_password;
 							$$cgi{"role_s"} = $db_role;
 							$$cgi{"jeton_s"} = 'true';
-							$$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
+#							$$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
 							$$cgi{"type_s"} = 'enregistrement';
 							$$cgi{"creation_dt"} = $db_creation_dt;
 							$$cgi{"updating_dt"} = $db_updating_dt;
@@ -152,7 +156,8 @@ else {
 							$req->content('['.$json_text.']');
 
 							$response_4 = $ua->request($req);
-							if ($response_4->is_success and $$cgi{"compteur_sessions_s"} eq 1 and $$cgi{"jeton_s"} eq 'true') {
+							if ($response_4->is_success # and $$cgi{"compteur_sessions_s"} eq 1 
+														and $$cgi{"jeton_s"} eq 'true') {
 								$perl_response{success} = $json->decode( $response_4->decoded_content);
 								$perl_response{role} = $db_role;
 							}else {
@@ -161,9 +166,11 @@ else {
 									$perl_response{'debug_msg'} = $response_4->message;
 								}
 							}
+=pod
 						}else{
 							$perl_response{'error'} = 'vous êtes déjà connecté ';
 						}		
+
 					}else{
 						$perl_response{'error'} = "sources server or service: $json_text ".$response_3->code;
 						if ($deb_mod) {
@@ -173,6 +180,7 @@ else {
 				}else{
 					$perl_response{'error'} = 'vous êtes déjà connecté ';
 				}
+=cut
 			}else{
 				$perl_response{'error'} = "sources server or service: ".$response_2->code;
 				if ($deb_mod) {

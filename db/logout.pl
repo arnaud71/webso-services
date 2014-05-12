@@ -43,7 +43,7 @@ else {
 	my $deb_mod = $cfg->param('debug');
 	my $id;
 	my $db_jeton;
-	my $db_compteur_sessions;
+#	my $db_compteur_sessions;
 	my $db_role;
 	my $query 	= q{};
 	my $db_user 	= $$cgi{'user_s'};
@@ -86,7 +86,7 @@ else {
 
 				$id			= $response_text->{response}->{docs}[0]->{"id"};   		
 		 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
-		 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
+#		 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 				$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};	
 				$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
 				$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
@@ -98,7 +98,7 @@ else {
 				$$cgi{"password_s"} = $db_password;
 				$$cgi{"jeton_s"} = 'false';
 				$$cgi{"role_s"}	= $db_role;
-				$$cgi{"compteur_sessions_s"} = 0;
+#				$$cgi{"compteur_sessions_s"} = 0;
 				$$cgi{"type_s"} = 'enregistrement';
 				$$cgi{"creation_dt"} = $db_creation_dt;
 				$$cgi{"updating_dt"} = $db_updating_dt;
@@ -112,7 +112,8 @@ else {
 				$req->content('['.$json_text.']');
 
 				$response_2 = $ua->request($req);
-				if ($response_2->is_success and $$cgi{"compteur_sessions_s"} eq 0 and $$cgi{"jeton_s"} eq 'false') {
+				if ($response_2->is_success # and $$cgi{"compteur_sessions_s"} eq 0 
+																		and $$cgi{"jeton_s"} eq 'false') {
 					$perl_response{success} = $json->decode( $response_2->decoded_content);
 				}else {
 					$perl_response{'error'} = "sources server or service: ".$response_2->code;

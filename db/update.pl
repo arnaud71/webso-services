@@ -58,7 +58,7 @@ else {
 		$db_role     = $q->param($ROLE);
 	}
 
-	my $db_compteur_sessions;
+#	my $db_compteur_sessions;
 	my $db_jeton;
 	my $db_password;
 	my $db_type;
@@ -94,7 +94,7 @@ else {
 			if($response_text->{response}->{numFound} eq 1){
 				## delete callback
 				delete $$cgi{'callback'};  		
-				$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
+#				$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 				$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
 				$db_password 		= $response_text->{response}->{docs}[0]->{"password_s"};
 				$db_type	 	= $response_text->{response}->{docs}[0]->{"type_s"};	
@@ -109,7 +109,7 @@ else {
 				$$cgi{"password_s"} = $db_password;
 				$$cgi{"role_s"} = $db_role;
 				$$cgi{"jeton_s"} = $db_jeton;
-				$$cgi{"compteur_sessions_s"} = $db_compteur_sessions;
+#				$$cgi{"compteur_sessions_s"} = $db_compteur_sessions;
 				$$cgi{"type_s"} = $db_type;
 				$$cgi{"creation_dt"} = $db_creation_dt;
 				$$cgi{"updating_dt"} = $db_updating_dt;
