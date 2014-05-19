@@ -49,6 +49,9 @@ my $db_jeton                = $cfg->param('db_jeton');
 my $db_url                  = $cfg->param('db_url');
 my $db_creation_date        = $cfg->param('db_creation_date');
 my $db_updating_date        = $cfg->param('db_updating_date');
+my $db_query                = $cfg->param('db_query');
+my $db_folder               = $cfg->param('db_folder');
+my $db_domain               = $cfg->param('db_domain');
 
 
 if (Config::Simple->error()) {
@@ -89,8 +92,10 @@ else {
     if ($$cgi{$db_type} eq $cfg->param('t_folder')) {
         $id = 'f_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
     }
+
+    # id of watch depends of user, url, query
     if ($$cgi{$db_type} eq $cfg->param('t_watch')) {
-        $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
+        $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_query});
     }
     
     ## delete callback
