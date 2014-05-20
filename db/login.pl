@@ -112,15 +112,15 @@ else {
 =pod			 			        		
 					# - faire un POST sur "compteur_sessions" sur le user en cours
 					#	en l'incrementant de 1
-					$$cgi{"id"} 			= $id;
-					$$cgi{"user_s"} 		= $db_user;
-					$$cgi{"password_s"} 		= $db_password;
-					$$cgi{"jeton_s"} 		= $db_jeton;
-					$$cgi{"role_s"} 		= $db_role;
+					$$cgi{"id"} 			        = $id;
+					$$cgi{"user_s"} 		        = $db_user;
+					$$cgi{"password_s"} 		    = $db_password;
+					$$cgi{"jeton_s"} 		        = $db_jeton;
+					$$cgi{"role_s"} 		        = $db_role;
 					$$cgi{"compteur_sessions_s"} 	= $db_compteur_sessions + 1;
-					$$cgi{"type_s"} 		= 'enregistrement';
-					$$cgi{"creation_dt"} = $db_creation_dt;
-					$$cgi{"updating_dt"} = $db_updating_dt;
+					$$cgi{"type_s"} 		        = 'user';
+					$$cgi{"creation_dt"}            = $db_creation_dt;
+					$$cgi{"updating_dt"}            = $db_updating_dt;
 
 					my $json_text   = $json->pretty->encode($cgi);
 
@@ -137,15 +137,15 @@ else {
 =cut
 							# - faire un POST sur le "JETON" sur le user en cours
 							#	en le remettant à "TRUE"
-							$$cgi{"id"} = $id;
-							$$cgi{"user_s"} = $db_user;
-							$$cgi{"password_s"} = $db_password;
-							$$cgi{"role_s"} = $db_role;
-							$$cgi{"jeton_s"} = 'true';
+							$$cgi{"id"}                 = $id;
+							$$cgi{"user_s"}             = $db_user;
+							$$cgi{"password_s"}         = $db_password;
+							$$cgi{"role_s"}             = $db_role;
+							$$cgi{"jeton_s"}            = 'true';
 #							$$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
-							$$cgi{"type_s"} = 'enregistrement';
-							$$cgi{"creation_dt"} = $db_creation_dt;
-							$$cgi{"updating_dt"} = $db_updating_dt;
+							$$cgi{"type_s"}             = 'user';
+							$$cgi{"creation_dt"}        = $db_creation_dt;
+							$$cgi{"updating_dt"}        = $db_updating_dt;
 
 							my $json_text   = $json->pretty->encode($cgi);
 

@@ -75,10 +75,10 @@ else {
     if ($$cgi{$db_type} eq $cfg->param('t_validation')) {
         $id = 'v_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add v_ for validation
     }
-    if ($$cgi{$db_type} eq $cfg->param('t_enregistrement')) {
-        $id = 'e_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password}); #add e_ for user
+    if ($$cgi{$db_type} eq $cfg->param('t_user')) {
+        $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password}); #add e_ for user
         $$cgi{$db_password} = md5_hex($$cgi{$db_password});
-        $$cgi{$db_role} = $$cgi{$db_role};
+        $$cgi{$db_role}     = $$cgi{$db_role};
     }
     if ($$cgi{$db_type} eq $cfg->param('t_document')) {
         $id = 'd_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #
@@ -86,9 +86,9 @@ else {
     if ($$cgi{$db_type} eq $cfg->param('t_report')) {
         $id = 'r_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
     }
-    if ($$cgi{$db_type} eq $cfg->param('t_user')) {
-        $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
-    }
+    #if ($$cgi{$db_type} eq $cfg->param('t_user')) {
+    #    $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
+    #}
     if ($$cgi{$db_type} eq $cfg->param('t_folder')) {
         $id = 'f_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
     }
