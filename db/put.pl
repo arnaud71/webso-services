@@ -70,6 +70,8 @@ else {
         if ($$cgi{refresh_rate_s}) {
             $$cgi{refresh_rate_s} = '12h'; # default rate each 23h
         }
+        # if rss , not sure
+
 
     }
     if ($$cgi{$db_type} eq $cfg->param('t_validation')) {
