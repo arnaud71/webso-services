@@ -83,6 +83,9 @@ else {
             .'&wt=json&indent=true');
 				
 	$response_1 = $ua->get($cfg->param('ws_db').$query_encoded_1);
+
+	#$perl_response{'error'} = $cfg->param('ws_db').$query_encoded_1;
+
 	my $response_text = $json->decode($response_1->decoded_content);
 
 	if ($response_1->is_success) {

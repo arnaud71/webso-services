@@ -5,7 +5,8 @@
 #
 #
 # input:
-#   - rss url
+#   - url : rss url to fetch
+#   - crawl_link : flag
 #
 ####################################################################
 
@@ -36,9 +37,10 @@ my $MAX_TIME_SLEEP  = $cfg->param('max_time_sleep');        # max sleep time bet
 
 
 # get params
-my $callback  = '';
+my $callback    = '';
 my $url;
 my $debug       = 1;
+my $crawl_link  = 'true';
 
 ###### end of CONST
 
@@ -69,6 +71,13 @@ else {
     $url     = 'http://news.google.com/news?pz=1&cf=all&ned=fr_ch&hl=fr&output=rss&q=iphone';
 }
 
+
+if ($q->param('crawl_link')) {
+        $crawl_link    = $q->param('crawl_link');
+}
+else {
+    $crawl_link     = 'true';
+}
 
 if ($url eq q{} ) {
     get_logger("crawler")->trace("url to crawl is empty");
@@ -124,8 +133,6 @@ if (($response->is_success) || ($response->is_redirect)) {
             $meta_content = $hs->process($meta_content);
 
 
-
-
             # get the date from RSS
             my $date_rss = $item->pubDate();
             my $str_date = q{};
@@ -143,48 +150,55 @@ if (($response->is_success) || ($response->is_redirect)) {
 
             my $tm = localtime;
             $datetime = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
-
-            # new fetch
-
-            my $ua2 = LWP::UserAgent->new;
             $link = clean_url($link);
 
-            my $params = '?url='.$link;
-            my $res_link    = $ua->get($webso_services.'harvester/fetcher_run.pl'.$params);
-            my $r_json_link = $json->decode( $res_link->content);
+
+            my $h;
+            if ($crawl_link eq 'true') {
+                # new fetch get the content of the link
+                my $ua2 = LWP::UserAgent->new;
+
+                my $params      = '?url='.$link;
+                my $res_link    = $ua2->get($webso_services.'harvester/fetcher_run.pl'.$params);
+                my $r_json_link = $json->decode( $res_link->content);
 
 
-            if ($res_link->code == 403) {       # stop if access denied
-                get_logger("crawler")->trace("$url 403 access denied: job $link stopped");
-                exit;
+                if ($res_link->code == 403) {       # stop if access denied
+                    get_logger("crawler")->trace("$url 403 access denied: job $link stopped");
+                    exit;
+                }
+
+
+
+                #print $$r_json_link{cached}."\n";
+
+                if (($$r_json_link{cached} eq 'false') &&  ($RANDOM_SLEEP)) {
+                    my $sleep_time = int(rand($MAX_TIME_SLEEP-$MIN_TIME_SLEEP))+$MIN_TIME_SLEEP;
+                    sleep($sleep_time);
+                    #print "wait!!\n";
+
+                }
+                if (($res_link->is_success) || ($res_link->is_redirect)){
+
+                    #print $$r_json_link{content}
+
+
+                    $$h{content}        = $$r_json_link{content};
+                    $$h{code_link}      = $$r_json_link{code};
+                    $$h{error_link}     = $$r_json_link{error};
+
+                }
             }
 
 
-
-            #print $$r_json_link{cached}."\n";
-
-            if (($$r_json_link{cached} eq 'false') &&  ($RANDOM_SLEEP)) {
-                my $sleep_time = int(rand($MAX_TIME_SLEEP-$MIN_TIME_SLEEP))+$MIN_TIME_SLEEP;
-                sleep($sleep_time);
-                #print "wait!!\n";
-
-            }
+            $$h{link}           = $link;
+            $$h{title}          = $title;
+            $$h{meta_content}   = $meta_content;
+            $$h{date}           = $str_date;
 
 
-            if (($res_link->is_success) || ($res_link->is_redirect)){
-
-                #print $$r_json_link{content}
-                my $h;
-                $$h{link}           = $link;
-                $$h{title}          = $title;
-                $$h{meta_content}   = $meta_content;
-                $$h{date}           = $str_date;
-                $$h{content}        = $$r_json_link{content};
-                $$h{code_link}      = $$r_json_link{code};
-                $$h{error_link}     = $$r_json_link{error};
-                push @tab_res, $h;
-                $c++;
-            }
+            push @tab_res, $h;
+            $c++;
         }
         #last; #stop on first item
     } #end foreach
