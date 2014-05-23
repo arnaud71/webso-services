@@ -52,6 +52,10 @@ my $db_updating_date        = $cfg->param('db_updating_date');
 my $db_query                = $cfg->param('db_query');
 my $db_folder               = $cfg->param('db_folder');
 my $db_domain               = $cfg->param('db_domain');
+my $db_widgetName           = $cfg->param('db_widgetName');
+my $db_widgetEnable         = $cfg->param('db_widgetEnable');
+my $db_widgetWeight         = $cfg->param('db_widgetWeight');
+my $db_userWidgetId         = $cfg->param('db_userWidgetId');
 
 
 if (Config::Simple->error()) {
@@ -96,6 +100,9 @@ else {
     # id of watch depends of user, url, query
     if ($$cgi{$db_type} eq $cfg->param('t_watch')) {
         $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_query});
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_widget')) {
+        $id = 'wg_'.md5_hex($$cgi{$db_userWidgetId}.$$cgi{$db_widgetName}); #add wg_ for widget
     }
     
     ## delete callback
