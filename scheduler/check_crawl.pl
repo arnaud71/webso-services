@@ -64,7 +64,7 @@ if ($response->is_success) {
     while ($r_json->{success}{response}{docs}[$i]) {
         my $source = $r_json->{success}{response}{docs}[$i];
         #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
-        $error_msg = Tools::fetchAddSource($source);
+        $error_msg = Tools::fetchDocSource($source);
         $i++;
         #exit;
     }

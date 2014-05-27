@@ -19,6 +19,8 @@ use LWP::UserAgent;
 use Config::Simple;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Time::localtime;
+use HTML::Restrict;
+use Tools;
 
 
 my $q       = CGI->new;
@@ -52,6 +54,7 @@ my $db_updating_date        = $cfg->param('db_updating_date');
 my $db_query                = $cfg->param('db_query');
 my $db_folder               = $cfg->param('db_folder');
 my $db_domain               = $cfg->param('db_domain');
+my $db_title                = $cfg->param('db_title');
 
 
 if (Config::Simple->error()) {
@@ -71,6 +74,16 @@ else {
             $$cgi{refresh_rate_s} = '12h'; # default rate each 23h
         }
         # if rss , not sure
+        if ($$cgi{$db_title}) {
+            my $hs = HTML::Restrict->new();
+            $$cgi{$db_title} = $hs->process($$cgi{$db_title});
+        }
+        my %source;
+        $source{$db_url}    = $$cgi{$db_url};
+        $source{$db_user}   = $$cgi{$db_user};
+        $source{id}         = $id;
+        my $error_msg = Tools::fetchDocSource(\%source,'false');
+        $perl_response{'error'} =  $error_msg;
 
 
     }

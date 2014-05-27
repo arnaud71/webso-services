@@ -35,17 +35,21 @@ $ua->env_proxy;
 
 ######################################################################
 #
-# add a source
-sub fetchAddSource {
+# fetch docs from a source
+sub fetchDocSource {
     my $error_msg = q{};
-    my ($source) = shift @_;
+    my ($source,$crawl_link) = @_;
     #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
 
     my $url_source = $$source{url_s};
     print $url_source."\n";
 
     my $params = '?url='.$url_source;
+    if ($crawl_link) {
+        $params.= '&crawl_link='.$crawl_link;
+    }
     my $res_rss = $ua->get($webso_services.'harvester/RSS/get_rss.pl'.$params);
+    #print $webso_services.'harvester/RSS/get_rss.pl'.$params;exit;
 
     my $r_json_rss;
 
@@ -147,7 +151,7 @@ sub extract_tika_content{
     my $content ='';
     while (my $line = <$socket>)
     {
-        $content .= $line;;
+        $content .= $line;
     }
 
     close($socket);

@@ -125,12 +125,16 @@ if (($response->is_success) || ($response->is_redirect)) {
             next;
         }
         if ($link !~/mp3$/) {
+            my $hs = HTML::Restrict->new();
+
             my $title   = $item->title();
 
+            $title = $hs->process($title);  # clean html
+
             my $meta_content  = $item->description();  #http::strip doesn't support utf8
-            # clean html
-            my $hs = HTML::Restrict->new();
-            $meta_content = $hs->process($meta_content);
+
+
+            $meta_content = $hs->process($meta_content);  # clean html
 
 
             # get the date from RSS
