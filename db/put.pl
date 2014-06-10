@@ -52,6 +52,7 @@ my $db_updating_date        = $cfg->param('db_updating_date');
 my $db_query                = $cfg->param('db_query');
 my $db_folder               = $cfg->param('db_folder');
 my $db_domain               = $cfg->param('db_domain');
+my $db_widgetId 			= $cfg->param('db_widgetId');
 my $db_widgetName           = $cfg->param('db_widgetName');
 my $db_widgetEnable         = $cfg->param('db_widgetEnable');
 my $db_widgetWeight         = $cfg->param('db_widgetWeight');
@@ -66,6 +67,13 @@ else {
     my $deb_mod = $cfg->param('debug');
     my $id = q{};
 
+    # add current date
+
+    my $tm = localtime;
+    my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
+
+    $$cgi{$db_creation_date} = $str_now;
+    $$cgi{$db_updating_date} = $str_now;
 
     # create id depending of type of object
     # if source type
@@ -74,15 +82,9 @@ else {
         if ($$cgi{refresh_rate_s}) {
             $$cgi{refresh_rate_s} = '12h'; # default rate each 23h
         }
-
     }
     if ($$cgi{$db_type} eq $cfg->param('t_validation')) {
         $id = 'v_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add v_ for validation
-    }
-    if ($$cgi{$db_type} eq $cfg->param('t_user')) {
-        $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password}); #add e_ for user
-        $$cgi{$db_password} = md5_hex($$cgi{$db_password});
-        $$cgi{$db_role}     = $$cgi{$db_role};
     }
     if ($$cgi{$db_type} eq $cfg->param('t_document')) {
         $id = 'd_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #
@@ -102,7 +104,8 @@ else {
         $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_query});
     }
     if ($$cgi{$db_type} eq $cfg->param('t_widget')) {
-        $id = 'wg_'.md5_hex($$cgi{$db_userWidgetId}.$$cgi{$db_widgetName}); #add wg_ for widget
+        $id = $$cgi{$db_widgetId};
+        delete $$cgi{$db_widgetId};
     }
     
     ## delete callback
@@ -112,13 +115,6 @@ else {
 
     $$cgi{id} = $id;
 
-    # add current date
-
-    my $tm = localtime;
-    my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
-
-    $$cgi{$db_creation_date} = $str_now;
-    $$cgi{$db_updating_date} = $str_now;
 
     my $json_text   = $json->pretty->encode($cgi);
 
