@@ -51,7 +51,7 @@ else {
 	my $pass 			= $$cgi{'password_s'};
 	my $db_role 		= $$cgi{'role_s'};
 	my $db_password		= md5_hex($pass);
-	my $id 				= 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password});
+	my $id 				= 'u_'.md5_hex($db_user.$db_password);
 	my $lengthUsername 	= length($db_user);
 	my $lengthPassword 	=  length($pass);
 
