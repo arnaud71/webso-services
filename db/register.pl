@@ -55,7 +55,7 @@ else {
 	my $lengthUsername 	= length($db_user);
 	my $lengthPassword 	=  length($pass);
 
-	$query 	= 'q='.'user_s:'.$db_user. 'AND type_s:user';
+	$query 	= 'q='.'user_s:'.$db_user. ' AND type_s:user';
 	
 	if ($q->param('callback')) {
 		$callback    = $q->param('callback');
@@ -116,7 +116,7 @@ else {
 						}
 					}									
 				}else{
-					$perl_response{'error'} = 'Utilisateur déjà enrégistré';
+					$perl_response{'error'} = 'Utilisateur déjà enrégistré '.$query;
 				}
 			}else{
 	            $perl_response{'error'} = "sources server or service ".$response_1->code;
