@@ -55,7 +55,7 @@ else {
 	my $lengthUsername 	= length($db_user);
 	my $lengthPassword 	=  length($pass);
 
-	$query 	= 'q='.'user_s:'.$db_user;
+	$query 	= 'q='.'user_s:'.$db_user. 'AND type_s:user';
 	
 	if ($q->param('callback')) {
 		$callback    = $q->param('callback');
