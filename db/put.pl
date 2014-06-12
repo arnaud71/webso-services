@@ -54,6 +54,7 @@ my $db_folder               = $cfg->param('db_folder');
 my $db_domain               = $cfg->param('db_domain');
 my $db_widgetId 			= $cfg->param('db_widgetId');
 my $db_widgetName           = $cfg->param('db_widgetName');
+my $db_widgetTitle          = $cfg->param('db_widgetTitle');
 my $db_widgetEnable         = $cfg->param('db_widgetEnable');
 my $db_widgetWeight         = $cfg->param('db_widgetWeight');
 my $db_userWidgetId         = $cfg->param('db_userWidgetId');
