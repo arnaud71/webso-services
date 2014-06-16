@@ -116,7 +116,7 @@ else {
 						}
 					}									
 				}else{
-					$perl_response{'error'} = 'Utilisateur déjà enrégistré '.$query;
+					$perl_response{'error'} = 'Utilisateur déjà enrégistré';
 				}
 			}else{
 	            $perl_response{'error'} = "sources server or service ".$response_1->code;
