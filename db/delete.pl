@@ -20,6 +20,8 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 
 my $q       = CGI->new;
+my $cgi     = $q->Vars;
+
 # prepare the JSON msg
 
 my $json    = JSON->new->allow_nonref;
@@ -42,6 +44,8 @@ else {
 
 
     my $ID              = $cfg->param('id');
+	my $db_type 		= $$cgi{'type_s'};
+	my $db_user 		= $$cgi{'user_s'};
 
 
     my $id = q{};
@@ -50,21 +54,21 @@ else {
     }
 
 
-
 #my $id = md5_hex($source_user.$source_url);
+	my $query;
+	if ($db_type eq 'user_s') {
+		$query = "{	
+					\"delete\":{\"query\":\"id: $id\"},
+				   	\"delete\":{\"query\":\"userWidgetId_s: $id\"}, 
+					\"delete\":{\"query\":\"user_s: $db_user\"}
+				 }";
+	}else{
+		$query = "{\"delete\":{\"query\":\"id: $id\"}";
+	}
 
-    my %perl_scalar = (
-            'delete'    => {
-    	                   'id'   => $id,
-                        }   
-    );
-
-
-    my $json_text   = $json->pretty->encode(\%perl_scalar);
-
+    my $json_text   = $query;
 
     print $json_text;
-
 
     # init user_agent
     my $ua = LWP::UserAgent->new;
@@ -97,3 +101,4 @@ my $json_response   = $json->pretty->encode(\%perl_response);
  
 print $json_response; 
  
+
