@@ -58,6 +58,7 @@ my $db_widgetTitle          = $cfg->param('db_widgetTitle');
 my $db_widgetEnable         = $cfg->param('db_widgetEnable');
 my $db_widgetWeight         = $cfg->param('db_widgetWeight');
 my $db_userWidgetId         = $cfg->param('db_userWidgetId');
+my $db_widgetContent        = $cfg->param('db_widgetContent');
 
 
 if (Config::Simple->error()) {
