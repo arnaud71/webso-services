@@ -82,8 +82,10 @@ else {
         $source{$db_url}    = $$cgi{$db_url};
         $source{$db_user}   = $$cgi{$db_user};
         $source{id}         = $id;
-        my $error_msg = Tools::fetchDocSource(\%source,'false');
-        $perl_response{'error'} =  $error_msg;
+        my $crawl_link  = 'false';
+        my $indexing    = 'true';
+        my $rss_json = Tools::fetchDocSource(\%source,$crawl_link,$indexing);
+        #$perl_response{'error'} =  $error_msg;
 
 
     }

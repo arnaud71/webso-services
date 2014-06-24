@@ -35,10 +35,16 @@ $ua->env_proxy;
 
 ######################################################################
 #
-# fetch docs from a source
+# fetch docs from a source and index if (indexing = 'true')
+#
+# input
+#   - url : url of the source
+#   - crawl_link : crawl the links contains in the source
+#   - indexing : index the fetched content
+#
 sub fetchDocSource {
     my $error_msg = q{};
-    my ($source,$crawl_link) = @_;
+    my ($source,$crawl_link,$indexing) = @_;
     #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
 
     my $url_source = $$source{url_s};
@@ -77,7 +83,7 @@ sub fetchDocSource {
 
             #print dd($h);exit;
 
-            if ($main_content) {
+            if (($indexing eq 'true') && $main_content) {
                 my $tm = localtime;
                 my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
 
@@ -114,7 +120,7 @@ sub fetchDocSource {
     else {
         $error_msg = 'service get_rss.pl is not accessible';
     }
-    return($error_msg);
+    return($r_json_rss);
 }
 
 

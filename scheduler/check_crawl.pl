@@ -64,13 +64,15 @@ if ($response->is_success) {
     while ($r_json->{success}{response}{docs}[$i]) {
         my $source = $r_json->{success}{response}{docs}[$i];
         #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
-        $error_msg = Tools::fetchDocSource($source);
+        my $crawl_link      = 'true';
+        my $indexing        = 'true';
+        my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
         $i++;
         #exit;
     }
-    if ($error_msg) {
+    #if ($error_msg) {
         #$$r_json_rss{error} = $error_msg;
-    }
+    #}
 }
 else {
      die $response->status_line;
