@@ -55,6 +55,13 @@ my $db_query                = $cfg->param('db_query');
 my $db_folder               = $cfg->param('db_folder');
 my $db_domain               = $cfg->param('db_domain');
 my $db_title                = $cfg->param('db_title');
+my $db_widgetId 			= $cfg->param('db_widgetId');
+my $db_widgetName           = $cfg->param('db_widgetName');
+my $db_widgetTitle          = $cfg->param('db_widgetTitle');
+my $db_widgetEnable         = $cfg->param('db_widgetEnable');
+my $db_widgetWeight         = $cfg->param('db_widgetWeight');
+my $db_userWidgetId         = $cfg->param('db_userWidgetId');
+my $db_widgetContent        = $cfg->param('db_widgetContent');
 
 
 if (Config::Simple->error()) {
@@ -113,6 +120,10 @@ else {
     # id of watch depends of user, url, query
     if ($$cgi{$db_type} eq $cfg->param('t_watch')) {
         $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_query});
+    }
+    if ($$cgi{$db_type} eq $cfg->param('t_widget')) {
+        $id = $$cgi{$db_widgetId};
+        delete $$cgi{$db_widgetId};
     }
     
     ## delete callback
