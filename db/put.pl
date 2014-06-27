@@ -118,7 +118,7 @@ else {
         $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_query});
     }
     if ($$cgi{$db_type} eq $cfg->param('t_widget')) {
-        $id = 'wg_'.md5_hex($$cgi{$db_id}.$$cgi{$db_user});
+        $id = $$cgi{$db_id};
         delete $$cgi{$db_id};
     }
     
