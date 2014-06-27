@@ -56,11 +56,9 @@ else {
 
 #my $id = md5_hex($source_user.$source_url);
 	my $query;
-	if ($db_type eq 'user_s') {
-		$query = "{	
-					\"delete\":{\"query\":\"id: $id\"},
-				   	\"delete\":{\"query\":\"userWidgetId_s: $id\"}, 
-					\"delete\":{\"query\":\"user_s: $db_user\"}
+	if ($db_type eq 'user') {
+		$query = "{
+                    \"delete\":{\"query\":\"user_s: $db_user\"}
 				 }";
 	}else{
 		$query = "{\"delete\":{\"query\":\"id: $id\"}";

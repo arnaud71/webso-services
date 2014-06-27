@@ -44,13 +44,15 @@ else {
 	my $id				= $cfg->param('id');
 	my $role			= $cfg->param('db_role');
 	my $type 			= $cfg->param('db_type');
-	my $widgetTitle 	= $cfg->param('db_widgetTitle');
-	my $widgetEnable 	= $cfg->param('db_widgetEnable');
+	my $title 			= $cfg->param('db_title');
+	my $enable 			= $cfg->param('db_enable');
 	my $db_id 			= $$cgi{$id};
 	my $db_role 		= $$cgi{$role};
-	my $db_widgetTitle 	= $$cgi{$widgetTitle};
-	my $db_widgetEnable	= $$cgi{$widgetEnable};
+	my $db_title 		= $$cgi{$title};
+	my $db_enable		= $$cgi{$enable};
 	my $db_type 		= $$cgi{$type};
+	my $db_creation_dt;
+	my $db_updating_dt;	
 	my $query 			= q{};
 	$query 	= 'q='.'id:'.$db_id;
 	if ($q->param('callback')) {
@@ -62,8 +64,7 @@ else {
 		my $db_jeton;
 		my $db_password;
 		my $db_user;
-		my $db_creation_dt;
-		my $db_updating_dt;
+
 		if (!(exists $perl_response{'error'})) {
 			# concatenate query and response
 			%perl_response = (%perl_response,%$cgi);
@@ -128,12 +129,10 @@ else {
 		}
 	}else{
 		if($db_type eq 'widget'){
-			my $db_Content;
-			my $db_userWidgetId;
-			my $db_widgetName;
-			my $db_widgetWeight;
-			my $db_creation_dt;
-			my $db_updating_dt;
+			my $db_query;
+			my $db_user;
+			my $db_widget_type;
+			my $db_weight;
 			if (!(exists $perl_response{'error'})) {
 				# concatenate query and response
 				%perl_response = (%perl_response,%$cgi);
@@ -154,21 +153,21 @@ else {
 					if($response_text->{response}->{numFound} eq 1){
 						## delete callback
 						delete $$cgi{'callback'};
-						$db_Content		 		= $response_text->{response}->{docs}[0]->{"widgetContent_s"};
-						$db_userWidgetId 		= $response_text->{response}->{docs}[0]->{"userWidgetId_s"};
-						$db_widgetName	 		= $response_text->{response}->{docs}[0]->{"widgetName_s"};
-						$db_widgetWeight	 	= $response_text->{response}->{docs}[0]->{"widgetWeight_s"};
+						$db_query		 		= $response_text->{response}->{docs}[0]->{"query_s"};
+						$db_user 		 		= $response_text->{response}->{docs}[0]->{"user_s"};
+						$db_widget_type	 		= $response_text->{response}->{docs}[0]->{"widget_type_s"};
+						$db_weight	 			= $response_text->{response}->{docs}[0]->{"weight_s"};
 						$db_creation_dt	 		= $response_text->{response}->{docs}[0]->{"creation_dt"};
 						#faire un POST
 						$$cgi{"id"} 				= $db_id;
-						$$cgi{"userContent_s"} 		= $db_Content;
-						$$cgi{"userWidgetId_s"} 	= $db_userWidgetId;
-						$$cgi{"widgetName_s"} 		= $db_widgetName;
-						$$cgi{"widgetWeight_s"} 	= $db_widgetWeight;
+						$$cgi{"query_s"} 			= $db_query;
+						$$cgi{"user_s"} 			= $db_user;
+						$$cgi{"widget_type_s"} 		= $db_widget_type;
+						$$cgi{"weight_s"} 			= $db_weight;
 						$$cgi{"creation_dt"} 		= $db_creation_dt;
 						$$cgi{"type_s"} 			= $db_type;
-						$$cgi{"widgetTitle_s"} 		= $db_widgetTitle;
-						$$cgi{"widgetEnable_s"}		= $db_widgetEnable;
+						$$cgi{"title_t"} 			= $db_title;
+						$$cgi{"enable_s"}			= $db_enable;
 						$$cgi{"updating_dt"} 		= $str_now;
 						my $json_text   = $json->pretty->encode($cgi);
 
