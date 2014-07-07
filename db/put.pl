@@ -71,6 +71,7 @@ else {
 
     # create id depending of type of object
     # if source type
+    my $rss_json_doc;
     if ($$cgi{$db_type} eq $cfg->param('t_source')) {
         $id = 's_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add s_ for source
         if ($$cgi{refresh_rate_s}) {
@@ -87,7 +88,7 @@ else {
         $source{id}         = $id;
         my $crawl_link  = 'false';
         my $indexing    = 'true';
-        my $rss_json = Tools::fetchDocSource(\%source,$crawl_link,$indexing);
+        $rss_json_doc = Tools::fetchDocSource(\%source,$crawl_link,$indexing);
         #$perl_response{'error'} =  $error_msg;
 
 
@@ -121,7 +122,14 @@ else {
         $id = $$cgi{$db_id};
         delete $$cgi{$db_id};
     }
-    
+
+    if ($$cgi{$db_type} eq $cfg->param('t_tree')) {
+            $id = 't_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title});
+    }
+
+
+
+
     ## delete callback
     delete $$cgi{'callback'};
 
@@ -161,6 +169,7 @@ else {
 
     if ($response->is_success) {
         $perl_response{success} = $json->decode( $response->content);  # or whatever
+        $perl_response{nb_doc_added}=$$rss_json_doc{nb};
      
     }
     else {

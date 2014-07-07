@@ -48,7 +48,7 @@ sub fetchDocSource {
     #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
 
     my $url_source = $$source{url_s};
-    print $url_source."\n";
+    #print $url_source."\n";
 
     my $params = '?url='.$url_source;
     if ($crawl_link) {
@@ -58,6 +58,8 @@ sub fetchDocSource {
     #print $webso_services.'harvester/RSS/get_rss.pl'.$params;exit;
 
     my $r_json_rss;
+
+
 
     if ($res_rss->is_success) {
 
@@ -102,24 +104,32 @@ sub fetchDocSource {
                         title_en        => $$h{title},
                         title_fr        => $$h{title},
                         lang_s          => $lang,
+                        read_b          => 'false',
                         source_id_ss    => $$source{id},
                         meta_flag_b     => $meta_flag,
                         creation_dt     => $str_now,
                         updating_dt     => $str_now
                 };
 
-                push_doc($json->encode($doc));
+                if (push_doc($json->encode($doc))) {
+                    $num_doc++;
+                }
 
             }
             else {
                         #    get_logger("crawler")->trace("ERROR: tika content extration empty".$$h{link});
             }
         } # end foreach
+        $$r_json_rss{nb} = $num_doc;
+
+
     }
 
     else {
         $error_msg = 'service get_rss.pl is not accessible';
     }
+
+
     return($r_json_rss);
 }
 
@@ -233,12 +243,14 @@ sub push_doc {
 
 
     if ($response->is_success) {
-        print $response->content;
+        return 1;
+        #print $response->content;
         #$perl_response{success} = $json->decode( $response->decoded_content);  # or whatever
 
     }
     else {
-        print 'doc server or service: '.$response->code;
+        print STDERR 'doc server or service: '.$response->code;
+        return 0;
         #$perl_response{'error'} = 'sources server or service: '.$response->code;
 
     }
