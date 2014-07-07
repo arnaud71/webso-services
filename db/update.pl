@@ -46,6 +46,8 @@ else {
 	my $type 			= $cfg->param('db_type');
 	my $title 			= $cfg->param('db_title');
 	my $enable 			= $cfg->param('db_enable');
+	my $query 			= $cfg->param('db_query');
+	my $db_query 		= $$cgi{$query};
 	my $db_id 			= $$cgi{$id};
 	my $db_role 		= $$cgi{$role};
 	my $db_title 		= $$cgi{$title};
@@ -129,7 +131,6 @@ else {
 		}
 	}else{
 		if($db_type eq 'widget'){
-			my $db_query;
 			my $db_user;
 			my $db_widget_type;
 			my $db_weight;
@@ -153,18 +154,17 @@ else {
 					if($response_text->{response}->{numFound} eq 1){
 						## delete callback
 						delete $$cgi{'callback'};
-						$db_query		 		= $response_text->{response}->{docs}[0]->{"query_s"};
 						$db_user 		 		= $response_text->{response}->{docs}[0]->{"user_s"};
 						$db_widget_type	 		= $response_text->{response}->{docs}[0]->{"widget_type_s"};
 						$db_weight	 			= $response_text->{response}->{docs}[0]->{"weight_s"};
 						$db_creation_dt	 		= $response_text->{response}->{docs}[0]->{"creation_dt"};
 						#faire un POST
 						$$cgi{"id"} 				= $db_id;
-						$$cgi{"query_s"} 			= $db_query;
 						$$cgi{"user_s"} 			= $db_user;
 						$$cgi{"widget_type_s"} 		= $db_widget_type;
 						$$cgi{"weight_s"} 			= $db_weight;
 						$$cgi{"creation_dt"} 		= $db_creation_dt;
+						$$cgi{"query_s"} 			= $db_query;
 						$$cgi{"type_s"} 			= $db_type;
 						$$cgi{"title_t"} 			= $db_title;
 						$$cgi{"enable_s"}			= $db_enable;
