@@ -42,11 +42,9 @@ if (Config::Simple->error()) {
 else {
 	my $deb_mod = $cfg->param('debug');
 
-
-    my $ID              = $cfg->param('id');
-	my $db_type 		= $$cgi{'type_s'};
-	my $db_user 		= $$cgi{'user_s'};
-
+    my $ID              	= $cfg->param('id');
+	my $db_type 			= $$cgi{'type_s'};
+	my $db_user 			= $$cgi{'user_s'};
 
     my $id = q{};
     if ($q->param($ID)) {
@@ -61,8 +59,14 @@ else {
                     \"delete\":{\"query\":\"user_s:$db_user\"}
 				 }";
 	}
-	else{
-		$query = "{\"delete\":{\"query\":\"id:$id\"}";
+	else {
+		if($db_type eq 'widget'){
+		$query = "{
+                    \"delete\":{\"query\":\"user_s:$db_user, type_s:widget\"}
+				 }";		
+		}else{
+			$query = "{\"delete\":{\"query\":\"id:$id\"}";
+		}	
 	}
 
     my $json_text   = $query;
