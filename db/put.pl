@@ -41,7 +41,6 @@ print $q->header('application/json');
 my $cfg     = new Config::Simple('../webso.cfg');
 
 
-my $db_id                   = $cfg->param('id');
 my $db_type                 = $cfg->param('db_type');
 my $db_user                 = $cfg->param('db_user');
 my $db_password             = $cfg->param('db_password');
@@ -59,6 +58,9 @@ my $db_widget_type          = $cfg->param('db_widget_type');
 my $db_enable               = $cfg->param('db_enable');
 my $db_weight               = $cfg->param('db_weight');
 
+# current date
+my $tm = localtime;
+my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
 
 if (Config::Simple->error()) {
     $perl_response{'debug_msg'} = Config::Simple->error();
@@ -119,8 +121,7 @@ else {
         $id = 'w_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_query});
     }
     if ($$cgi{$db_type} eq $cfg->param('t_widget')) {
-        $id = $$cgi{$db_id};
-        delete $$cgi{$db_id};
+		$id = 'wg_'.md5_hex($$cgi{$db_user}.$$cgi{$db_widget_type}.$str_now);
     }
 
     if ($$cgi{$db_type} eq $cfg->param('t_tree')) {
@@ -138,9 +139,6 @@ else {
     $$cgi{id} = $id;
 
     # add current date
-
-    my $tm = localtime;
-    my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
 
     $$cgi{$db_creation_date} = $str_now;
     $$cgi{$db_updating_date} = $str_now;
