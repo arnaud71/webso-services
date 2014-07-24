@@ -34,8 +34,10 @@ my $json    = JSON->new->allow_nonref;
 my %perl_response = (    
     );
 
+my $callback = q{};
+
 # print json header
-print $q->header('application/json');
+# print $q->header('application/json');
 
 # reading the conf file
 my $cfg     = new Config::Simple('../webso.cfg');
@@ -128,8 +130,9 @@ else {
             $id = 't_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title});
     }
 
-
-
+    if ($q->param('callback')) {
+        $callback    = $q->param('callback');
+    }
 
     ## delete callback
     delete $$cgi{'callback'};
@@ -179,5 +182,16 @@ else {
 }
 
 my $json_response   = $json->pretty->encode(\%perl_response);
+
+if ($callback) { 
+    print 'Access-Control-Allow-Origin: *';
+    print 'Access-Control-Allow-Methods: GET'; 
+    print "Content-type: application/javascript; charset=utf-8\n\n";
+    $json_response   = $callback.'('.$json_response.');';
+} else { 
+    # Header for access via browser, curl, etc. 
+    print "Content-type: application/json\n\n"; 
+} 
+
 print $json_response; 
  
