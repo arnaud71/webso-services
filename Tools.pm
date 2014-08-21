@@ -11,6 +11,8 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Log::Log4perl qw(:easy);
 use Time::localtime;
 
+
+
 my $json    = JSON->new->allow_nonref;
 
 my $cfg             = new Config::Simple('../webso.cfg');
@@ -29,8 +31,6 @@ my $db_source_type          = $cfg->param('db_source_type');
 my $ua = LWP::UserAgent->new;
 $ua->timeout(1000);
 $ua->env_proxy;
-
-
 
 
 ######################################################################
@@ -234,7 +234,6 @@ sub push_doc {
     );
 
     $req->content_type('application/json;charset=utf-8');
-
 
 
     $req->content('['.$json_text.']');
