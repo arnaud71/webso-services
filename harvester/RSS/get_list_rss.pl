@@ -45,64 +45,67 @@ if ($q->param('query')) {
 
 if ($query) {
 	my $r_google_rss = get_google_rss($query);
-
-
-	# db connection
-	#my ($dbh,$err_db) = ResipiConfig::my_connect();
-
-	## check if DB was available
-	#if ($err_db) {
-    #	print STDERR $err_db."\n";
-    #	exit;
-	#}
-
-
-	# query to send to mysql db
-
-	#my $query		= 	"SELECT entity_id,field_url_url FROM resipi.field_data_field_url";
-
-
-	# do sql query and get results
-	#my $sth = $dbh->prepare($query);
-	#$sth->execute;
-
-	#if ($dbh->errstr()) {
-	#	$perl_response{'error'} = 'drupal db problem';
-	#}
-
-
-
-	# format sql results to hash perl
-	#my $def = q{};
-
-
-	#my %already;
-	#while (my $ref = $sth->fetchrow_hashref()) {
-    #	$already{$$ref{field_url_url}} = 1;
-	#}
+	my $r_feedly_rss = get_feedly_rss($query);
 
 	my $count = 0;
 	my $i = 0;
 
 	my @tab_res;
+
+	my %already_url;
+
 	while ($r_google_rss->{responseData}{entries}[$i]) {
 		my $item = $r_google_rss->{responseData}{entries}[$i++];
-		#print $$item{url}."\n";
-	#	if ($already{$$item{url}}) {
-	#		$$item{new} = "0";
-	#	}
-	#	else {
-	#		$$item{new} = "1";
-	#		$count++;
-	#	}
+
+		if ($already_url{$$item{'url'}}) {
+		    next;
+		}
+		else {
+		    $already_url{$$item{'url'}} = 1;
+		}
+
+		$$item{'api'}  = 'google';
+		$$item{'language'}  = '-';
 	    $count++;
 		push @tab_res, $item;
 
 	}
 
+    my $i = 0;
+
+    while ($r_feedly_rss->{results}[$i]) {
+    	my $item = $r_feedly_rss->{results}[$i++];
+
+
+
+    	#dd($item);
+    	#change item to be like google title, website -> url, feedId -> link
+
+        $$item{'link'} = $$item{'website'};
+        $$item{'url'} = $$item{'feedId'};
+        $$item{'url'} =~ s/^feed\///;
+        $$item{'api'}  = 'feedly';
+
+        delete $$item{'feedId'};
+        delete $$item{'website'};
+
+        if ($already_url{$$item{'url'}}) {
+            next;
+        }
+        else {
+            $already_url{$$item{'url'}} = 1;
+        }
+
+    	#keep only french and english feed
+    	if ($$item{'language'} eq 'en' || $$item{'language'} eq 'fr') {
+            push @tab_res, $item;
+            $count++;
+        }
+    }
+
 
 	$perl_response{'res'} 		= \@tab_res;
-	$perl_response{'count'} 	= $i;
+	$perl_response{'count'} 	= $count;
 	#$perl_response{'count_new'} = $count;
 
 }
@@ -133,7 +136,7 @@ sub get_google_rss {
 	my $query 		= shift @_;
 	my $api_google 	= 'https://ajax.googleapis.com/ajax/services/feed/find?v=1.0&q='.$query;
 
-	print $api_google."\n";
+	#print $api_google."\n";
 	#https://ajax.googleapis.com/ajax/services/feed/find?v=1.0&q=Official%20Google%20Blog&userip=INSERT-USER-IP"
 	my $ua = LWP::UserAgent->new;
 	$ua->timeout(30);
@@ -153,6 +156,42 @@ sub get_google_rss {
 	if (($response->is_success) || ($response->is_redirect)) {
 		$r_json = $json->decode( $response->decoded_content);
 
+	}
+	else {
+		print STDERR $response->message;
+	}
+	return $r_json;
+
+}
+
+
+sub get_feedly_rss {
+    my $r_json;
+    my $query 		= shift @_;
+    my $n = 200;
+
+
+    #http://cloud.feedly.com/v3/search/feeds?q=query&n=100&local=en
+    my $api_feedly = 'http://cloud.feedly.com/v3/search/feeds?q='.$query.'&n='.$n;
+
+    my $ua = LWP::UserAgent->new;
+	$ua->timeout(30);
+
+	if ($RANDOM_AGENT) {
+    	$ua->agent(rand_ua("browsers"));
+	}
+
+	if ($USE_PROXY) {
+		$ENV{HTTPS_PROXY} = 'proxyem.etat-ge.ch:80';
+        $ENV{"HTTPS_PROXY_USERNAME"} = 'zzrodin';
+        $ENV{"HTTPS_PROXY_PASSWORD"} = 'as789HGI1';
+    	#$ENV{"HTTPS_PROXY_USERNAME"} = 'hegtest';
+        #$ENV{"HTTPS_PROXY_PASSWORD"} = 'Bingo07';
+	}
+
+	my $response = $ua->get($api_feedly);
+	if (($response->is_success) || ($response->is_redirect)) {
+		$r_json = $json->decode( $response->decoded_content);
 	}
 	else {
 		print STDERR $response->message;
