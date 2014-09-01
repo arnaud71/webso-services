@@ -29,7 +29,7 @@ my $json    = JSON->new->allow_nonref;
 my $callback = q{};
 my %perl_response = ();
 # print json header
-print $q->header('application/json');
+#print $q->header('application/json');
 # reading the conf file
 my $cfg     = new Config::Simple('../webso.cfg');
 
