@@ -59,6 +59,9 @@ else {
         elsif ($k eq 'start') {
                     $query .= '&start='.$$cgi{$k};
                 }
+        elsif ($k eq 'sort') {
+                            $query .= '&sort='.$$cgi{$k};
+                        }
         elsif ($k ne 'callback') {
             $query .= '&fq='.$k.':'.$$cgi{$k};
         }
