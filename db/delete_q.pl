@@ -16,6 +16,7 @@ use lib "..";
 use LWP::UserAgent;
 use Config::Simple;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
+use Data::Dump qw(dd);
 
 
 
@@ -54,11 +55,11 @@ else {
 
 
 #my $id = md5_hex($source_user.$source_url);
-    $query = "{\"delete\":{\"query\":\"$query\"}";
+    $query = "{\"delete\":{\"query\":\"$query\"}}";
 
     my $json_text   = $query;
 
-    print $json_text;
+
 
     # init user_agent
     my $ua = LWP::UserAgent->new;
@@ -68,12 +69,18 @@ else {
 
 
     my $req = HTTP::Request->new(
-        POST => $cfg->param('ws_db').'update'
+        POST => $cfg->param('ws_db').'update',
+        #POST => 'http://localhost:8983/solr/collection1/update?wt=json'
     );
     $req->content_type('application/json');
     $req->content($json_text);
 
     my $response = $ua->request($req);
+
+    #print $query;
+    #dd($req);
+    #exit;
+
 
     if ($response->is_success) {
         print $response->decoded_content;  # or whatever
