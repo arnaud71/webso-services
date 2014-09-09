@@ -22,6 +22,7 @@ use Data::Dump qw(dd);
 
 my $q       = CGI->new;
 my $cgi     = $q->Vars;
+my $callback = q{};
 
 # prepare the JSON msg
 
@@ -30,8 +31,6 @@ my $json    = JSON->new->allow_nonref;
 my %perl_response = (
     );
 
-# print json header
-print $q->header('application/json');
 
 # reading the conf file
 my $cfg     = new Config::Simple('../webso.cfg');
@@ -46,6 +45,7 @@ else {
 
 #   my $ID              = $cfg->param('id');
 	my $query 		= $$cgi{'query'};
+	$callback    = $$cgi{'callback'};
 
 
 #    my $id = q{};
@@ -59,19 +59,16 @@ else {
 
     my $json_text   = $query;
 
-
-
     # init user_agent
     my $ua = LWP::UserAgent->new;
     $ua->timeout(10);
     $ua->env_proxy;
 
-
-
     my $req = HTTP::Request->new(
         POST => $cfg->param('ws_db').'update',
         #POST => 'http://localhost:8983/solr/collection1/update?wt=json'
     );
+
     $req->content_type('application/json');
     $req->content($json_text);
 
@@ -83,7 +80,7 @@ else {
 
 
     if ($response->is_success) {
-        print $response->decoded_content;  # or whatever
+       $perl_response{success} = $json->decode( $response->content);  # or whatever
     }
     else {
         $perl_response{'error'} = 'sources server or service: '.$response->code;
@@ -94,7 +91,18 @@ else {
 }
 
 
+
 my $json_response   = $json->pretty->encode(\%perl_response);
+if ($callback) {
+    print 'Access-Control-Allow-Origin: *';
+    print 'Access-Control-Allow-Methods: GET';
+    print "Content-type: application/javascript; charset=utf-8\n\n";
+    $json_response   = $callback.'('.$json_response.');';
+} else {
+    # Header for access via browser, curl, etc.
+    print "Content-type: application/json\n\n";
+}
+
 
 print $json_response;
 
