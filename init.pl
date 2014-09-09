@@ -66,7 +66,7 @@ print "step :".$i++."\n";
 print "chmod +x for pl\n";
 print "*******************************\n\n";
 
-print `chmod -R a+x *.pl`;
+print `sudo chmod -R a+x ./`;
 
 print "*******************************\n";
 print "step :".$i++."\n";
