@@ -26,3 +26,16 @@ In the root directory please run:
 
 sudo perl init.pl
 
+
+Server Installation
+-------------------
+
+
+mv webso-services webso-services_save
+
+git clone https://github.com/arnaud71/webso-services.git
+
+sudo perl init.pl
+
+vi webso.cfg (proxy = 1)
+
