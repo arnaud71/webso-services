@@ -34,7 +34,7 @@ my $service = {
     faroo_news => 'http://www.faroo.com/api?start=1&length=10&l=en&src=news&f=rss&q=',
 
 
-    google_news => 'http://news.google.com/news?pz=1&ned=us&hl=en&output=rss&q=',
+    google_news => 'https://news.google.com/news?pz=1&ned=us&hl=en&output=rss&q=',
     # title.$t description.$t pubDate.$t link.$t (description in html)
     delicious   => 'http://delicious.com/v2/rss/popular/',
     # title.$t description.$t pubDate.$t link.$t
@@ -191,6 +191,7 @@ sub get_rss {
 		$ENV{HTTPS_PROXY} = 'proxyem.etat-ge.ch:80';
         $ENV{"HTTPS_PROXY_USERNAME"} = 'zzrodin';
         $ENV{"HTTPS_PROXY_PASSWORD"} = 'as789HGI1';
+        $ua->proxy(['http'], 'http://zzrodin:as789HGI1@proxyem.etat-ge.ch:80');
     	#$ENV{"HTTPS_PROXY_USERNAME"} = 'hegtest';
         #$ENV{"HTTPS_PROXY_PASSWORD"} = 'Bingo07';
 	}

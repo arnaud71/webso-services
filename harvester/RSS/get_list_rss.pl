@@ -185,6 +185,7 @@ sub get_feedly_rss {
 		$ENV{HTTPS_PROXY} = 'proxyem.etat-ge.ch:80';
         $ENV{"HTTPS_PROXY_USERNAME"} = 'zzrodin';
         $ENV{"HTTPS_PROXY_PASSWORD"} = 'as789HGI1';
+        $ua->proxy(['http'], 'http://zzrodin:as789HGI1@proxyem.etat-ge.ch:80');
     	#$ENV{"HTTPS_PROXY_USERNAME"} = 'hegtest';
         #$ENV{"HTTPS_PROXY_PASSWORD"} = 'Bingo07';
 	}
