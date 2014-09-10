@@ -28,9 +28,7 @@ my $json    = JSON->new->allow_nonref;
 
 my %perl_response = (    
     );
-
-# print json header
-print $q->header('application/json');
+my $callback = q{};
 
 # reading the conf file
 my $cfg     = new Config::Simple('../webso.cfg');
@@ -45,6 +43,7 @@ else {
     my $ID              	= $cfg->param('id');
 	my $db_type 			= $$cgi{'type_s'};
 	my $db_user 			= $$cgi{'user_s'};
+	$callback               = $$cgi{'callback'};
 
     my $id = q{};
     if ($q->param($ID)) {
@@ -71,13 +70,12 @@ else {
 
     my $json_text   = $query;
 
-    print $json_text;
+    #print $json_text;
 
     # init user_agent
     my $ua = LWP::UserAgent->new;
     $ua->timeout(10);
     $ua->env_proxy;
-
 
 
     my $req = HTTP::Request->new(
@@ -89,7 +87,7 @@ else {
     my $response = $ua->request($req);
  
     if ($response->is_success) {
-        print $response->decoded_content;  # or whatever
+        $perl_response{success} = $json->decode( $response->content); # or whatever
     }
     else {
         $perl_response{'error'} = 'sources server or service: '.$response->code;
@@ -101,7 +99,17 @@ else {
 
 
 my $json_response   = $json->pretty->encode(\%perl_response);
- 
-print $json_response; 
+if ($callback) {
+    print 'Access-Control-Allow-Origin: *';
+    print 'Access-Control-Allow-Methods: GET';
+    print "Content-type: application/javascript; charset=utf-8\n\n";
+    $json_response   = $callback.'('.$json_response.');';
+} else {
+    # Header for access via browser, curl, etc.
+    print "Content-type: application/json\n\n";
+}
+
+
+print $json_response;
  
 
