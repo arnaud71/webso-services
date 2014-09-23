@@ -124,7 +124,7 @@ sub process_tweet{
 
     if ($ok) {
         #print "$filename\n";
-        #print $tweet->{text}."\n";
+        print $tweet->{text}."\n";
         mkpath("$data_dir/$name/$timeStamp/");
         get_logger("error")->trace("TRACE:$data_dir/$name/$timeStamp/$filename");
         open(OUT,">$data_dir/$name/$timeStamp/$filename") or die "$data_dir/$name/$timeStamp/$filename";

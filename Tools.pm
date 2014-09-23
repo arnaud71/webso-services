@@ -80,7 +80,9 @@ sub fetchDocSource {
                 $meta_flag      = 'true';
             }
 
-            my $lang    = extract_tika_lang(\$$h{content});
+            my $lang    = extract_tika_lang(\$main_content);
+            #my $lang    = extract_tika_lang(\$$h{content});
+
             #print $lang."\n";
 
             #print dd($h);exit;
