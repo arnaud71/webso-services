@@ -107,6 +107,7 @@ sub fetchDocSource {
                         title_fr        => $$h{title},
                         lang_s          => $lang,
                         read_b          => 'false',
+                        validated_b     => 'false',
                         source_id_ss    => $$source{id},
                         meta_flag_b     => $meta_flag,
                         creation_dt     => $str_now,
