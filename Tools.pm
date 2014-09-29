@@ -30,7 +30,7 @@ my $db_source_type          = $cfg->param('db_source_type');
 # init user_agent
 my $ua = LWP::UserAgent->new;
 $ua->timeout(1000);
-$ua->env_proxy;
+#$ua->env_proxy;
 
 
 ######################################################################

@@ -48,7 +48,7 @@ Log::Log4perl::init(\$logconf);
 # init user_agent
 my $ua = LWP::UserAgent->new;
 $ua->timeout(1000);
-$ua->env_proxy;
+#$ua->env_proxy;
 
 
 my $params = '?'.$db_type.'=source';
