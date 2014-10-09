@@ -11,7 +11,9 @@ Perl required module from CPAN
 	install CHI
 	install Config::Simple
 	install Crypt::SSLeay
+	install Crypt::Bcrypt::Easy
 	install Data::Dump
+	install Data::GUID
 	install DateTime::Format::RSS
 	install Digest::MD5
 	install HTML::Restrict
@@ -23,7 +25,7 @@ Perl required module from CPAN
 	install URI::Encode
 	install WWW::UserAgent::Random
 	install XML::FeedPP
-	install XML::LibXML
+	install XML::LibXML (dep : libxml2-dev from linux sources)
 	install XML::NamespaceSupport
 	install XML::SAX
 	install XML::XML2JSON
