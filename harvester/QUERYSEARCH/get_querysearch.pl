@@ -25,6 +25,8 @@ use Config::Simple;
 use XML::XML2JSON;
 use HTML::Restrict;
 use URI::Encode qw(uri_encode uri_decode);
+use HTML::Entities;
+use utf8;
 
 
 my $service = {
@@ -133,6 +135,15 @@ if ($query && $type) {
             $$item{pubDate}     = $$item{pubDate}{'$t'};
             $$item{title}       = $$item{title}{'$t'};
 
+            # clean content
+
+            $$item{description} = clean_content($$item{description});
+            $$item{title}       = clean_content($$item{title});
+
+            $$item{description} = highlight_keywords($$item{description},$query);
+            $$item{title}       = highlight_keywords($$item{title},$query);
+
+
             #dd($item);exit;
 
             # delete all other keys
@@ -162,11 +173,13 @@ if ($callback) {
     print 'Access-Control-Allow-Methods: GET';
     print "Content-type: application/javascript\n\n";
     $json_response   = $callback.'('.$json_response.');';
+
 } else {
     # Header for access via browser, curl, etc.
     print "Content-type: application/json\n\n";
 }
 
+utf8::encode($json_response);
 print $json_response;
 
 #####################################
@@ -208,7 +221,7 @@ sub get_rss {
             #$rss =~ s/&quot;http:\/\/news\.google\.com\/news\/url//g;
 
         #}
-
+        utf8::decode($rss);
 		my $XML2JSON = XML::XML2JSON->new();
         my $JSON = $XML2JSON->convert($rss);
         $r_json = $json->decode($JSON);
@@ -222,3 +235,34 @@ sub get_rss {
 
 }
 
+
+sub clean_content {
+
+    my $content = shift @_;
+
+    $content = decode_entities($content);
+
+    return $content;
+
+}
+
+
+# basic hightlighting of keywords
+sub highlight_keywords {
+
+    my ($content,$keywords) = @_;
+
+
+    my @tab = split / /,$keywords;
+
+    foreach my $k (@tab) {
+        if ($content && $k) {
+
+        $content =~ s/$k/<b>$&<\/b>/gis;
+
+        }
+    }
+    return $content;
+
+
+}

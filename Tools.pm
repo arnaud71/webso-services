@@ -10,6 +10,8 @@ use IO::Socket::INET;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Log::Log4perl qw(:easy);
 use Time::localtime;
+use FindBin qw($Bin);
+use lib "$Bin/../lib";
 
 
 

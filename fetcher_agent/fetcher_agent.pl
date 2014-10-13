@@ -127,6 +127,7 @@ else {
 my $json_response   = $json->pretty->encode(\%perl_response);
 
 if ($callback) {
+
     print 'Access-Control-Allow-Origin: *';
     print 'Access-Control-Allow-Methods: GET';
     print "Content-type: application/javascript; charset=utf-8\n\n";
