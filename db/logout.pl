@@ -5,10 +5,12 @@
 # modify fields "jeton" and "compteur_sessions" in webso's user
 #
 # inputs:
-#	nothing
+#	username
+# TODO input tokens instead of username
 #
 # Contributors:
 #   - Salah Zenati : 18/04/2014
+#   - Clement MILLET : 06/10/2014
 ######################################################################
 
 use strict;
@@ -43,16 +45,21 @@ else {
 	my $deb_mod = $cfg->param('debug');
 	my $id;
 	my $db_jeton;
+	my $db_email;
 #	my $db_compteur_sessions;
 	my $db_role;
 	my $query 	= q{};
 	my $db_user 	= $$cgi{'user_s'};
-	my $pass 	= $$cgi{'password_s'};
-	my $db_password	= md5_hex($pass);
+	my $db_username;
+	# my $pass 	= $$cgi{'password_s'};
+	my $db_password	;#= md5_hex($pass);
+	my $db_token;
+	my $db_token_timeout;
 	my $db_creation_dt;
 	my $db_updating_dt;
 
-	$query 	= 'q='.'user_s:'.$db_user. ' AND password_s:'.$db_password;
+	#$query 	= 'q='.'user_s:'.$db_user. ' AND password_s:'.$db_password;
+	$query 	= 'q='.'user_s:'.$db_user.' AND type_s:user';
 
 	if ($q->param('callback')) {
 		$callback    = $q->param('callback');
@@ -85,23 +92,31 @@ else {
 				delete $$cgi{'callback'};
 
 				$id			= $response_text->{response}->{docs}[0]->{"id"};   		
-		 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
-#		 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
-				$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};	
+				$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
+				$db_username	= $response_text->{response}->{docs}[0]->{"user_s"};
+				$db_email		= $response_text->{response}->{docs}[0]->{"email_s"};
+				$db_password	= $response_text->{response}->{docs}[0]->{"password_s"};
+				# $db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
+				$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};
+				$db_token		= $response_text->{response}->{docs}[0]->{"token_s"};
+				$db_token_timeout	= $response_text->{response}->{docs}[0]->{"token_timeout_dt"};
 				$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
 				$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
 					
 				# - faire un POST sur le "JETON" sur le user en cours
 				#	en le remettant à "FALSE" et remettre le compteur de sessions a 0
-				$$cgi{"id"}             = $id;
-				$$cgi{"user_s"}         = $db_user;
-				$$cgi{"password_s"}     = $db_password;
-				$$cgi{"jeton_s"}        = 'false';
-				$$cgi{"role_s"}	        = $db_role;
-#				$$cgi{"compteur_sessions_s"} = 0;
-				$$cgi{"type_s"}         = 'user';
-				$$cgi{"creation_dt"}    = $db_creation_dt;
-				$$cgi{"updating_dt"}    = $db_updating_dt;
+				$$cgi{"id"}                 = $id;
+				$$cgi{"user_s"}             = $db_username;
+				$$cgi{"password_s"}         = $db_password;
+				$$cgi{"email_s"}			= $db_email;
+				$$cgi{"role_s"}             = $db_role;
+				$$cgi{"jeton_s"}            = 'false';
+				$$cgi{"token_s"}			= $db_token;
+				$$cgi{"token_timeout_dt"}	= $db_token_timeout;
+				# $$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
+				$$cgi{"type_s"}             = 'user';
+				$$cgi{"creation_dt"}        = $db_creation_dt;
+				$$cgi{"updating_dt"}        = $db_updating_dt;
 
 				my $json_text   = $json->pretty->encode($cgi);
 
@@ -143,6 +158,6 @@ if ($callback) {
 } else { 
     # Header for access via browser, curl, etc. 
     print "Content-type: application/json\n\n"; 
-} 
+}
 
 print $json_response;

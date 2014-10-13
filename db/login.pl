@@ -5,10 +5,11 @@
 # verify login's user to connect on webso
 #
 # inputs:
-#	username and password
+#	username and password or token and token timeout
 #
 # Contributors:
 #   - Salah Zenati : 18/04/2014
+#   - Clement MILLET : 06/10/2014
 ######################################################################
 
 use strict;
@@ -19,10 +20,23 @@ use LWP::UserAgent;
 use Config::Simple;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use URI::Encode qw(uri_encode uri_decode);
-
+use Crypt::Bcrypt::Easy;
+use Data::GUID;
 
 my $q       = CGI->new;
 my $cgi     = $q->Vars;
+#Test for post
+	# local ($buffer, @pairs, $pair, $name, $value, %FORM);
+	# $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
+	# if ($ENV{'REQUEST_METHOD'} eq "POST")
+	# {
+	# 	read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+	# }else {
+	# 	$buffer = $ENV{'QUERY_STRING'};
+	# }
+
+#Lifetime of a token in Day (D*sec in day)
+my $life = 7*86400;
 
 # prepare the JSON msg
 my $json    = JSON->new->allow_nonref;
@@ -43,8 +57,12 @@ else {
 	my $deb_mod = $cfg->param('debug');
 	my $id;
 	my $db_jeton;
+	my $db_username;
+	my $db_email;
 #	my $db_compteur_sessions;
 	my $db_role;
+	my $db_token;
+	my $db_token_timeout;
 	my $db_creation_dt;
 	my $db_updating_dt;
 
@@ -52,9 +70,13 @@ else {
 	my $db_user 	= $$cgi{'user_s'};
 	my $pass 	= $$cgi{'password_s'};
 	my $db_password	= md5_hex($pass);
+	my $db_bcrypt;
+	if($pass != ""){
+		$db_bcrypt	= bcrypt->crypt( $pass );
+	}
 
 	my $lengthUsername = length($db_user);
-	my $lengthPassword =  length($pass);
+	my $lengthPassword = length($pass);
 
 	$query 	= 'q='.'user_s:'.$db_user.' AND password_s:'.$db_password;
 
@@ -104,18 +126,31 @@ else {
 					my $response_text = $json->decode($response_2->decoded_content);				
 
 					if ($response_2->is_success) {
-#						if($response_text->{response}->{numFound} eq 1){
+						#if($response_text->{response}->{numFound} eq 1){
 							## delete callback
 							delete $$cgi{'callback'};
 
 
 							$id			= $response_text->{response}->{docs}[0]->{"id"};   		
 					 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
-#					 		$db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
-							$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};	
+					 		$db_username	= $response_text->{response}->{docs}[0]->{"user_s"};
+					 		$db_password	= $response_text->{response}->{docs}[0]->{"password_s"};
+					 		$db_email		= $response_text->{response}->{docs}[0]->{"email_s"};
+					 		# $db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
+							$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};
+							$db_token		= $response_text->{response}->{docs}[0]->{"token_s"};
+							$db_token_timeout	= $response_text->{response}->{docs}[0]->{"token_timeout_l"};
 							$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
 							$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
 
+							#Verify if token_timeout is defined and if timeout is not over
+							#else create a new token and update timeout
+							my $tm = time;
+							if(!$db_token_timeout || $db_token_timeout <= $tm){
+								my $token = Data::GUID->new;
+								$db_token = md5_hex($token->as_string.$tm);
+								$db_token_timeout = $tm+$life;
+							}
 =pod			 			        		
 							# - faire un POST sur "compteur_sessions" sur le user en cours
 							#	en l'incrementant de 1
@@ -145,11 +180,14 @@ else {
 									# - faire un POST sur le "JETON" sur le user en cours
 									#	en le remettant à "TRUE"
 									$$cgi{"id"}                 = $id;
-									$$cgi{"user_s"}             = $db_user;
+									$$cgi{"user_s"}             = $db_username;
 									$$cgi{"password_s"}         = $db_password;
+									$$cgi{"email_s"}			= $db_email;
 									$$cgi{"role_s"}             = $db_role;
 									$$cgi{"jeton_s"}            = 'true';
-#									$$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
+									$$cgi{"token_s"}			= $db_token;
+									$$cgi{"token_timeout_l"}	= $db_token_timeout;
+									# $$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
 									$$cgi{"type_s"}             = 'user';
 									$$cgi{"creation_dt"}        = $db_creation_dt;
 									$$cgi{"updating_dt"}        = $db_updating_dt;
@@ -166,7 +204,10 @@ else {
 									if ($response_4->is_success # and $$cgi{"compteur_sessions_s"} eq 1 
 																and $$cgi{"jeton_s"} eq 'true') {
 										$perl_response{success} = $json->decode( $response_4->decoded_content);
+										$perl_response{username} = $db_username;
 										$perl_response{role} = $db_role;
+										$perl_response{token} = $db_token;
+										$perl_response{token_timeout} = $db_token_timeout;
 									}else {
 										$perl_response{'error'} = "sources server or service: ".$response_4->code;
 										if ($deb_mod) {
@@ -209,7 +250,7 @@ else {
     }
 }
 
-my $json_response   = $json->pretty->encode(\%perl_response);
+my $json_response = $json->pretty->encode(\%perl_response);
 
 if ($callback) { 
     print 'Access-Control-Allow-Origin: *';

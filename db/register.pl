@@ -5,10 +5,11 @@
 # register a user on webso
 #
 # inputs:
-#	username and password
+#	username, password, email
 #
 # Contributors:
 #   - Salah Zenati : 10/06/2014
+#   - Clement MILLET : 06/10/2014
 ######################################################################
 
 use strict;
@@ -20,6 +21,7 @@ use Config::Simple;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use URI::Encode qw(uri_encode uri_decode);
 use Time::localtime;
+use Crypt::Bcrypt::Easy;
 
 my $q       = CGI->new;
 my $cgi     = $q->Vars;
@@ -51,9 +53,12 @@ else {
 	my $pass 			= $$cgi{'password_s'};
 	my $db_role 		= $$cgi{'role_s'};
 	my $db_password		= md5_hex($pass);
+	#Change to bcrypt for november release
+	#my $db_password		= bcrypt->crypt( $pass );
+	my $db_email		= $$cgi{'email_s'};
 	my $id 				= 'u_'.md5_hex($db_user.$db_password);
 	my $lengthUsername 	= length($db_user);
-	my $lengthPassword 	=  length($pass);
+	my $lengthPassword 	= length($pass);
 
 	$query 	= 'q='.'user_s:'.$db_user. ' AND type_s:user';
 	
@@ -93,6 +98,7 @@ else {
 					$$cgi{"user_s"}             = $db_user;
 					$$cgi{"password_s"}         = $db_password;
 					$$cgi{"role_s"}             = $db_role;
+					$$cgi{"email_s"}			= $db_email;
 					$$cgi{"jeton_s"}            = 'false';
 					$$cgi{"type_s"}            	= 'user';
 				    $$cgi{$db_creation_date} 	= $str_now;

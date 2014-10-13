@@ -20,6 +20,7 @@ use JSON;
 use lib "..";
 use LWP::UserAgent;
 use Config::Simple;
+use Crypt::Bcrypt::Easy;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use URI::Encode qw(uri_encode uri_decode);
 use Time::localtime;
@@ -62,7 +63,12 @@ else {
                     $query .= '"id":"'.$$cgi{$k}.'",';
                 }
                 else {
-                    $query .= '"'.$k.'":{"set":"'.$$cgi{$k}.'"},';
+                    if($k eq 'password_s'){
+                        $query .= '"'.$k.'":{"set":"'.md5_hex($$cgi{$k}).'"},';
+                    }
+                    else{
+                        $query .= '"'.$k.'":{"set":"'.$$cgi{$k}.'"},';
+                    }
                 }
             }
         }
