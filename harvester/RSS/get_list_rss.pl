@@ -65,7 +65,9 @@ if ($query) {
 		}
 
 		$$item{'api'}  = 'google';
-		$$item{'language'}  = '-';
+		$$item{'language'}      = '-';
+		$$item{'description'}   = $$item{'contentSnippet'};
+		delete $$item{'contentSnippet'};
 	    $count++;
 		push @tab_res, $item;
 
@@ -200,3 +202,4 @@ sub get_feedly_rss {
 	return $r_json;
 
 }
+
