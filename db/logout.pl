@@ -90,17 +90,14 @@ else {
 				$id	= $response_text->{response}->{docs}[0]->{"id"};
 				# $db_compteur_sessions = $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 
-				$$cgi{"id"}        = $id;
-				$$cgi{"jeton_s"}   = 'false';
 				# $$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
 
-				my $json_text   = $json->pretty->encode($cgi);
 				my $req = HTTP::Request->new(
 					POST => $cfg->param('webso_services').'/db/change.pl'
 				);
 
 				$req->content_type('application/json');
-				$req->content($json_text);
+				$req->content('{"id":"'.$id.'", "jeton_s": "false"}');
 
 				$response_2 = $ua->request($req);
 				if ($response_2->is_success # and $$cgi{"compteur_sessions_s"} eq 0 

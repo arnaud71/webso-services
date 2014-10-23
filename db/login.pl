@@ -60,12 +60,8 @@ else {
 	my $query 	= q{};
 	my $db_user = $$cgi{'user_s'};
 	my $pass 	= $$cgi{'password_s'};
-	my $db_password;
-	my $db_bcrypt;
-	if($pass ne ""){
-		$db_password = md5_hex($pass);
-		$db_bcrypt	 = bcrypt->crypt($pass);
-	}
+	my $db_password = md5_hex($pass);
+	my $db_bcrypt	= bcrypt->crypt($pass);
 
 	my $lengthUsername = length($db_user);
 	my $lengthPassword = length($pass);
@@ -105,7 +101,7 @@ else {
 
 	my $response_text = $json->decode($response_1->decoded_content);
 
-	if($lengthUsername ge 6 and $lengthUsername le 20 and $lengthPassword ge 6 and $lengthPassword le 20){
+	if($lengthUsername >= 6 and $lengthUsername <= 20 and $lengthPassword >= 6 and $lengthPassword <= 20){
 			if ($response_1->is_success) {
 				if($response_text->{response}->{numFound} eq 1){
 
@@ -136,24 +132,18 @@ else {
 								$db_token = md5_hex($token->as_string.$tm);
 								$db_token_timeout = $tm+$life;
 							}
+							my $data = '{"id":"'.$id.'", "jeton_s": "true", "token_s":"'.$db_token.'", "token_timeout_l":"'.$db_token_timeout.'"}';
+							#$data{"compteur_sessions_s"} 	= $db_compteur_sessions + 1;
 
-							$$cgi{"id"}                 = $id;
-							$$cgi{"jeton_s"}            = 'true';
-							$$cgi{"token_s"}			= $db_token;
-							$$cgi{"token_timeout_l"}	= $db_token_timeout;
-							#$$cgi{"compteur_sessions_s"} 	= $db_compteur_sessions + 1;
-
-							my $json_text   = $json->pretty->encode($cgi);
 							my $req = HTTP::Request->new(
 								POST => $cfg->param('webso_services').'/db/change.pl'
 							);
 
 							$req->content_type('application/json');
-							$req->content($json_text);
+							$req->content($data);
 
 								$response_4 = $ua->request($req);
-								if ($response_4->is_success # and $$cgi{"compteur_sessions_s"} eq 1 
-															and $$cgi{"jeton_s"} eq 'true') {
+								if ($response_4->is_success) {
 									$perl_response{success} = $json->decode( $response_4->decoded_content);
 									$perl_response{username} = $db_username;
 									$perl_response{role} = $db_role;
