@@ -25,15 +25,6 @@ use Data::GUID;
 
 my $q       = CGI->new;
 my $cgi     = $q->Vars;
-#Test for post
-	# local ($buffer, @pairs, $pair, $name, $value, %FORM);
-	# $ENV{'REQUEST_METHOD'} =~ tr/a-z/A-Z/;
-	# if ($ENV{'REQUEST_METHOD'} eq "POST")
-	# {
-	# 	read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
-	# }else {
-	# 	$buffer = $ENV{'QUERY_STRING'};
-	# }
 
 #Lifetime of a token in Day (D*sec in day)
 my $life = 7*86400;
@@ -67,12 +58,13 @@ else {
 	my $db_updating_dt;
 
 	my $query 	= q{};
-	my $db_user 	= $$cgi{'user_s'};
+	my $db_user = $$cgi{'user_s'};
 	my $pass 	= $$cgi{'password_s'};
-	my $db_password	= md5_hex($pass);
+	my $db_password;
 	my $db_bcrypt;
-	if($pass != ""){
-		$db_bcrypt	= bcrypt->crypt( $pass );
+	if($pass ne ""){
+		$db_password = md5_hex($pass);
+		$db_bcrypt	 = bcrypt->crypt($pass);
 	}
 
 	my $lengthUsername = length($db_user);
@@ -113,7 +105,7 @@ else {
 
 	my $response_text = $json->decode($response_1->decoded_content);
 
-	if($lengthUsername >= 6 and $lengthUsername <= 20 and $lengthPassword >= 6 and $lengthPassword <= 20){
+	if($lengthUsername ge 6 and $lengthUsername le 20 and $lengthPassword ge 6 and $lengthPassword le 20){
 			if ($response_1->is_success) {
 				if($response_text->{response}->{numFound} eq 1){
 
@@ -130,90 +122,49 @@ else {
 							## delete callback
 							delete $$cgi{'callback'};
 
-
-							$id			= $response_text->{response}->{docs}[0]->{"id"};   		
-					 		$db_jeton 		= $response_text->{response}->{docs}[0]->{"jeton_s"};
-					 		$db_username	= $response_text->{response}->{docs}[0]->{"user_s"};
-					 		$db_password	= $response_text->{response}->{docs}[0]->{"password_s"};
-					 		$db_email		= $response_text->{response}->{docs}[0]->{"email_s"};
-					 		# $db_compteur_sessions 	= $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
+							#Prepare change.pl request to avoid redundant code
+							$id	       = $response_text->{response}->{docs}[0]->{"id"};
+							$db_token  = $response_text->{response}->{docs}[0]->{"token_s"};
+							$db_token_timeout  = $response_text->{response}->{docs}[0]->{"token_timeout_l"};
+							$db_username	= $response_text->{response}->{docs}[0]->{"user_s"};
 							$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};
-							$db_token		= $response_text->{response}->{docs}[0]->{"token_s"};
-							$db_token_timeout	= $response_text->{response}->{docs}[0]->{"token_timeout_l"};
-							$db_creation_dt	 	= $response_text->{response}->{docs}[0]->{"creation_dt"};
-							$db_updating_dt	 	= $response_text->{response}->{docs}[0]->{"updating_dt"};
+							# $db_compteur_sessions = $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 
-							#Verify if token_timeout is defined and if timeout is not over
-							#else create a new token and update timeout
 							my $tm = time;
 							if(!$db_token_timeout || $db_token_timeout <= $tm){
 								my $token = Data::GUID->new;
 								$db_token = md5_hex($token->as_string.$tm);
 								$db_token_timeout = $tm+$life;
 							}
-=pod			 			        		
-							# - faire un POST sur "compteur_sessions" sur le user en cours
-							#	en l'incrementant de 1
-							$$cgi{"id"} 			        = $id;
-							$$cgi{"user_s"} 		        = $db_user;
-							$$cgi{"password_s"} 		    = $db_password;
-							$$cgi{"jeton_s"} 		        = $db_jeton;
-							$$cgi{"role_s"} 		        = $db_role;
-							$$cgi{"compteur_sessions_s"} 	= $db_compteur_sessions + 1;
-							$$cgi{"type_s"} 		        = 'user';
-							$$cgi{"creation_dt"}            = $db_creation_dt;
-							$$cgi{"updating_dt"}            = $db_updating_dt;
+
+							$$cgi{"id"}                 = $id;
+							$$cgi{"jeton_s"}            = 'true';
+							$$cgi{"token_s"}			= $db_token;
+							$$cgi{"token_timeout_l"}	= $db_token_timeout;
+							#$$cgi{"compteur_sessions_s"} 	= $db_compteur_sessions + 1;
 
 							my $json_text   = $json->pretty->encode($cgi);
-
 							my $req = HTTP::Request->new(
-									POST => $cfg->param('ws_db').'update'
+								POST => $cfg->param('webso_services').'/db/change.pl'
 							);
+
 							$req->content_type('application/json');
-							$req->content('['.$json_text.']');
-				
-							$response_3 = $ua->request($req);
+							$req->content($json_text);
 
-							if ($response_3->is_success) {
-								if($$cgi{"compteur_sessions_s"} eq 1){
-=cut
-									# - faire un POST sur le "JETON" sur le user en cours
-									#	en le remettant à "TRUE"
-									$$cgi{"id"}                 = $id;
-									$$cgi{"user_s"}             = $db_username;
-									$$cgi{"password_s"}         = $db_password;
-									$$cgi{"email_s"}			= $db_email;
-									$$cgi{"role_s"}             = $db_role;
-									$$cgi{"jeton_s"}            = 'true';
-									$$cgi{"token_s"}			= $db_token;
-									$$cgi{"token_timeout_l"}	= $db_token_timeout;
-									# $$cgi{"compteur_sessions_s"} = $db_compteur_sessions + 1;
-									$$cgi{"type_s"}             = 'user';
-									$$cgi{"creation_dt"}        = $db_creation_dt;
-									$$cgi{"updating_dt"}        = $db_updating_dt;
-
-									my $json_text   = $json->pretty->encode($cgi);
-
-									my $req = HTTP::Request->new(
-											POST => $cfg->param('ws_db').'update'
-									);
-									$req->content_type('application/json');
-									$req->content('['.$json_text.']');
-
-									$response_4 = $ua->request($req);
-									if ($response_4->is_success # and $$cgi{"compteur_sessions_s"} eq 1 
-																and $$cgi{"jeton_s"} eq 'true') {
-										$perl_response{success} = $json->decode( $response_4->decoded_content);
-										$perl_response{username} = $db_username;
-										$perl_response{role} = $db_role;
-										$perl_response{token} = $db_token;
-										$perl_response{token_timeout} = $db_token_timeout;
-									}else {
-										$perl_response{'error'} = "sources server or service: ".$response_4->code;
-										if ($deb_mod) {
-											$perl_response{'debug_msg'} = $response_4->message;
-										}
+								$response_4 = $ua->request($req);
+								if ($response_4->is_success # and $$cgi{"compteur_sessions_s"} eq 1 
+															and $$cgi{"jeton_s"} eq 'true') {
+									$perl_response{success} = $json->decode( $response_4->decoded_content);
+									$perl_response{username} = $db_username;
+									$perl_response{role} = $db_role;
+									$perl_response{token} = $db_token;
+									$perl_response{token_timeout} = $db_token_timeout;
+								}else {
+									$perl_response{'error'} = "sources server or service: ".$response_4->code;
+									if ($deb_mod) {
+										$perl_response{'debug_msg'} = $response_4->message;
 									}
+								}
 =pod
 								}else{
 									$perl_response{'error'} = 'vous êtes déjà connecté ';
