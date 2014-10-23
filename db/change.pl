@@ -88,7 +88,7 @@ else {
                     }
                     else {
                         if($k eq 'password_hash' && $var[0]{$k} eq 'false'){
-                            $query .= '"'.password_s.'":{"set":"'.md5_hex($var[0]{$k}).'"},';
+                            $query .= '"password_s":{"set":"'.md5_hex($var[0]{$k}).'"},';
                         }
                         else{
                             $query .= '"'.$k.'":{"set":"'.$var[0]{$k}.'"},';
@@ -146,7 +146,7 @@ my $json_response   = $json->pretty->encode(\%perl_response);
 
 if ($callback) {
     print 'Access-Control-Allow-Origin: *';
-    print 'Access-Control-Allow-Methods: GET';
+    print 'Access-Control-Allow-Methods: GET, POST, OPTIONS'."\n";
     print "Content-type: application/javascript; charset=utf-8\n\n";
     $json_response   = $callback.'('.$json_response.');';
 } else {
