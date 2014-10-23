@@ -78,8 +78,33 @@ else {
         print $json_text;
 
     }
-    else {
-        push @{$perl_response{'error'}},'atomic change ID is missing';
+    else{
+        if($q->param('POSTDATA')){
+            my @var = $json->decode($$cgi{'POSTDATA'});
+            foreach my $k (keys $var[0]) {
+                if ($k ne 'callback') {
+                    if ($k eq 'id') {
+                        $query .= '"id":"'.$var[0]{$k}.'",';
+                    }
+                    else {
+                        if($k eq 'password_hash' && $var[0]{$k} eq 'false'){
+                            $query .= '"'.password_s.'":{"set":"'.md5_hex($var[0]{$k}).'"},';
+                        }
+                        else{
+                            $query .= '"'.$k.'":{"set":"'.$var[0]{$k}.'"},';
+                        }
+                    }
+                }
+            }
+            $query .= '"updating_dt":{"set":"'.$str_now.'"}';
+            #$query .= '"revision":{"inc":1}'."\n";
+            $json_text = '{'.$query.'}';
+            print $json_text;
+        }
+        else{
+
+            push @{$perl_response{'error'}},'atomic change ID is missing';
+        }
     }
 
 
@@ -106,7 +131,7 @@ else {
 
 
         if ($res->is_success) {
-            $perl_response{success} = $json->decode( $res->content);
+            $perl_response{success} = $json->decode($res->content);
         }
         else {
             $perl_response{'error'} = 'sources server or service: '.$res->code;
