@@ -83,13 +83,30 @@ if ($q->param('typeQuery')) {
 
 
 if ($query && $type) {
-    if ($$service{$type}) {
-        my $r_rss = get_rss($$service{$type}.$query,$type);
+        $type =~ s/,$//g;
+
+        my @tab_type = split ',',$type;
+        my $r_rss;
+        my @all_items =();
+        foreach my $t (@tab_type) {
+            if ($$service{$t}) {
+
+                $r_rss = get_rss($$service{$t}.$query);
+                foreach my $i (keys $$r_rss{rss}{channel}{item}) {
+                    my $item = $$r_rss{rss}{channel}{item}[$i];
+                    push @all_items,$item;
+                }
+            }
+            else {
+
+                $perl_response{'error'} = 'type does\'nt exist';
+
+            }
+        }
      #dd($r_rss);
 
         my $count = 0;
-        foreach my $i (keys $$r_rss{rss}{channel}{item}) {
-            my $item = $$r_rss{rss}{channel}{item}[$i];
+        foreach my $item (@all_items) {
 
             if ($type eq 'google_news') {
                 $$item{link}{'$t'} =~ s/http:\/\/news\.google\.com\/news\/url(.*?)&url=(.*?)$/$2/;
@@ -159,10 +176,7 @@ if ($query && $type) {
         }
         $perl_response{'count'} 	= $count;
     }
-    else {
-        $perl_response{'error'} = 'type does\'nt exist';
-    }
-}
+
 else {
     $perl_response{'error'} = 'no query';
 }
@@ -209,6 +223,7 @@ sub get_rss {
         #$ENV{"HTTPS_PROXY_PASSWORD"} = 'Bingo07';
 	}
 
+    #print STDERR  $$service{$type}.$query."\n";
 	my $response = $ua->get($query);
 	if (($response->is_success) || ($response->is_redirect)) {
 		my $rss = $response->content;
