@@ -103,6 +103,7 @@ else {
 							delete $$cgi{'callback'};
 
 							$id	= $response_text->{response}->{docs}[0]->{"id"};
+							my $name = $response_text->{response}->{docs}[0]->{"user_s"};
 
 							my $string_gen = String::Random->new;
 							#Generate a 8 character password with 7 alphanumeric and 1 special character at the end.
@@ -123,8 +124,40 @@ else {
 
 								$perl_response{success} = $json->decode($response_3->content);
 
-								my $mess = "Voici votre nouveau mot de passe : ".$pass." nous vous conseillons de changer ce mot de passe rapidement.\n";
-								$perl_response{'mdp'}=$mess;
+								my $mess = '<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-Type" content="text/html" charset="UTF-8" />
+	<meta http-equiv="content-language" content="french" />
+</head>
+<body width="900px"; align="center">
+<div width="900px" style="width: 900px; margin: auto;">
+	<header style="margin:20px 0;">
+		<img src="http://inelio.fr/images/logo.png" alt="Logo I+1" style="width:153px; height:157px;"/>
+		<h3 style="float: right;">Inélio, votre plate-forme de veille intuitive et collaborative</h3>
+	</header>
+	<div style="margin: 30px;">
+		<h3>Nouveau mot de passe</h3>
+		<h4>Bonjour '.$name.'</h4>
+
+		<p>Voici votre nouveau mot de passe :</p>
+		<p style="margin-left:50px;">
+			Login : '.$name.'<br>
+			Mot de passe : '.$pass.'
+		</p>
+		<p>Nous vous conseillons de changer ce mot de passe rapidement.</p>
+
+		<p style="margin-top: 30px">Cordialement,<br>
+		L’équipe d’Inélio</p>
+	</div>
+	<footer style="margin: 20px 30px;">
+		<p>Mail : contact@inelio.fr<br>
+		Tel : +33 (0)6 75 68 41 04</p>
+	</footer>
+</div>
+</body>
+</html>';
+								#"Voici votre nouveau mot de passe : ".$pass." nous vous conseillons de changer ce mot de passe rapidement.\n";
 
 								my $msg = MIME::Lite->new(
 									From     => 'no-reply@inelio.fr',
@@ -133,11 +166,12 @@ else {
 									Subject  => "Votre demande de mot de passe.",
 									Data     => $mess
 								);
+								$msg->attr("content-type" => "text/html");
 								#Only usable when a postfix server is running.
 								$msg->send;
 
 							}else{
-								$perl_response{'error'} = "sources server or service3: ".$response_3->code;
+								$perl_response{'error'} = "sources server or service: ".$response_3->code;
 								if ($deb_mod) {
 										$perl_response{'debug_msg'} = $response_3->message;
 								}
@@ -146,7 +180,7 @@ else {
 						# 	$perl_response{'error'} = 'vous êtes déjà connecté ';
 						# }
 					}else{
-						$perl_response{'error'} = "sources server or service2: ".$response_2->code;
+						$perl_response{'error'} = "sources server or service: ".$response_2->code;
 						if ($deb_mod) {
 							$perl_response{'debug_msg'} = $response_2->message;
 						}
@@ -155,7 +189,7 @@ else {
 					$perl_response{'error'} = ' nom d\'utilisateur et/ou mot de passe incorrect(s)';
 				}
 			}else {
-				$perl_response{'error'} = "sources server or service1: ".$response_1->code;
+				$perl_response{'error'} = "sources server or service: ".$response_1->code;
 				if ($deb_mod) {
 					$perl_response{'debug_msg'} = $response_1->message;
 				}
@@ -170,12 +204,12 @@ my $json_response = $json->pretty->encode(\%perl_response);
 
 if ($callback) { 
 	print 'Access-Control-Allow-Origin: *';
-	print 'Access-Control-Allow-Methods: POST, OPTIONS'."\n";
+	print 'Access-Control-Allow-Methods: POST, OPTIONS';
 	print "Content-type: application/javascript; charset=utf-8\n\n";
 	$json_response   = $callback.'('.$json_response.');';
 } else { 
 	# Header for access via browser, curl, etc.
-	print 'Access-Control-Allow-Methods: POST, OPTIONS'."\n";
+	print 'Access-Control-Allow-Methods: POST, OPTIONS';
 	print "Content-type: application/json\n\n";
 } 
 
