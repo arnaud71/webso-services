@@ -126,6 +126,10 @@ else {
 		$id = 'wg_'.md5_hex($$cgi{$db_user}.$$cgi{$db_widget_type}.$str_now);
     }
 
+    if ($$cgi{$db_type} eq $cfg->param('t_waiting')) {
+        $id = 'wa_'.md5_hex($$cgi{$db_title}.$$cgi{$db_url}.$$cgi{$db_query});
+    }
+
     if ($$cgi{$db_type} eq $cfg->param('t_tree')) {
             $id = 't_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title});
     }
