@@ -104,6 +104,7 @@ else {
 
 							$id	= $response_text->{response}->{docs}[0]->{"id"};
 							my $name = $response_text->{response}->{docs}[0]->{"user_s"};
+							my $mail = $response_text->{response}->{docs}[0]->{"email_s"};
 
 							my $string_gen = String::Random->new;
 							#Generate a 8 character password with 7 alphanumeric and 1 special character at the end.
@@ -161,7 +162,7 @@ else {
 
 								my $msg = MIME::Lite->new(
 									From     => 'no-reply@inelio.fr',
-									To       => 'clement@localhost',
+									To       => $mail,
 									Cc       => '',
 									Subject  => "Votre demande de mot de passe.",
 									Data     => $mess
