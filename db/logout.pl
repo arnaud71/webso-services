@@ -100,8 +100,7 @@ else {
 				$req->content('{"id":"'.$id.'", "jeton_s": "false"}');
 
 				$response_2 = $ua->request($req);
-				if ($response_2->is_success # and $$cgi{"compteur_sessions_s"} eq 0 
-																		and $$cgi{"jeton_s"} eq 'false') {
+				if ($response_2->is_success) {
 					$perl_response{success} = $json->decode( $response_2->decoded_content);
 				}else {
 					$perl_response{'error'} = "sources server or service: ".$response_2->code;
