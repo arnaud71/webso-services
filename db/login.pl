@@ -61,10 +61,13 @@ else {
 	my $db_user = $$cgi{'user_s'};
 	my $pass 	= $$cgi{'password_s'};
 	my $db_password = md5_hex($pass);
-	my $db_bcrypt	= bcrypt->crypt($pass);
+	my $db_bcrypt;
 
 	my $lengthUsername = length($db_user);
 	my $lengthPassword = length($pass);
+	if($lengthPassword != 0){
+		bcrypt->crypt($pass);
+	}
 
 	$query 	= 'q='.'user_s:'.$db_user.' AND password_s:'.$db_password;
 
