@@ -153,7 +153,8 @@ else {
 									$perl_response{token} = $db_token;
 									$perl_response{token_timeout} = $db_token_timeout;
 								}else {
-									$perl_response{'error'} = "sources server or service: ".$response_4->code;
+									$perl_response{'error'} = "_ERROR_SERVICE_";
+									$perl_response{'error_code'} = $response_4->code;
 									if ($deb_mod) {
 										$perl_response{'debug_msg'} = $response_4->message;
 									}
@@ -174,22 +175,24 @@ else {
 						}
 =cut
 					}else{
-						$perl_response{'error'} = "sources server or service: ".$response_2->code;
+						$perl_response{'error'} = "_ERROR_SERVICE_";
+						$perl_response{'error_code'} = $response_2->code;
 						if ($deb_mod) {
 						    $perl_response{'debug_msg'} = $response_2->message;
 						}
 					}
 				}else{
-				    $perl_response{'error'} = ' nom d\'utilisateur et/ou mot de passe incorrect(s)';
+				    $perl_response{'error'} = "_LOGIN_ERROR_USPWD_";
 				}
 		        }else {
-		            $perl_response{'error'} = "sources server or service ".$response_1->code;
+		            $perl_response{'error'} = "_ERROR_SERVICE_";
+		            $perl_response{'error_code'} = $response_1->code;
 		            if ($deb_mod) {
 		                $perl_response{'debug_msg'} = $response_1->message;
 		            }
 		        }
 		}else{
-			$perl_response{'error'} = "Longueur du nom d'utilisateur et/ou du mot de passe doit/doivent être superieur(s) à 6 et inférieur(s) à 20 caractères";	
+			$perl_response{'error'} = "_LOGIN_ERROR_LENGTH_";
 		}
     }
 }
