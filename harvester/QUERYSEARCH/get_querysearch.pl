@@ -28,6 +28,7 @@ use URI::Encode qw(uri_encode uri_decode);
 use HTML::Entities;
 use utf8;
 use XML::FeedPP;
+use Encode qw(decode encode);
 
 
 my $service = {
@@ -88,7 +89,8 @@ if ($q->param('out')) {
        $out    = $q->param('out');
    }
 
-my $new_feed = XML::FeedPP::RSS->new(title => 'webso online search', utf8_flag => 1 );
+my $new_feed = XML::FeedPP::RSS->new(title => 'webso online search', description =>'webso online search', link => 'http://localhost' );
+$new_feed->xmlns('xmlns:media' => 'http://search.yahoo.com/mrss/');
 
 if ($query && $type) {
         $type =~ s/,$//g;
@@ -203,7 +205,12 @@ my $json_response   = $json->pretty->encode(\%perl_response);
 #utf8::encode($json_response);
 if ($out eq 'rss') {
     print "Content-type: application/rss+xml\n\n";
-    print $new_feed->to_string();
+    my $rss_str =  $new_feed->to_string();
+
+
+   # my $octets    = decode('UTF-8', $rss_str, Encode::FB_DEFAULT);
+   # my $good_utf8 = encode('UTF-8', $octets,         Encode::FB_CROAK);
+    print $rss_str;
 }
 else {
     if ($callback) {

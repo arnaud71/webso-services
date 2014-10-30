@@ -113,7 +113,8 @@ sub fetchDocSource {
                         source_id_ss    => $$source{id},
                         meta_flag_b     => $meta_flag,
                         creation_dt     => $str_now,
-                        updating_dt     => $str_now
+                        updating_dt     => $str_now,
+                        waiting_b       => $$source{waiting_b}
                 };
 
                 if (push_doc($json->encode($doc))) {
