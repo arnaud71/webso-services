@@ -107,8 +107,13 @@ my $url_page = $url;
 my $response = my $res = $ua->get($url_page);
 
 my $c = 0;
-if ($response->is_success) {
-    my $feed = XML::FeedPP->new($response->content);
+if ($response->is_success){
+
+
+    my $str = $response->content;
+    utf8::decode($str);
+    my $feed = XML::FeedPP->new($str);
+
 
 
     $perl_response{'title'}         = $feed->title();
@@ -166,8 +171,9 @@ if ($callback) {
     # Header for access via browser, curl, etc.
     print "Content-type: application/json\n\n";
 }
-
+utf8::encode($json_response);
 print $json_response;
+
 
 
 

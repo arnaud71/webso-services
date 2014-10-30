@@ -103,7 +103,10 @@ if ($query && $type) {
 
                 $r_rss = get_rss($$service{$t}.$query);
                 foreach my $i (keys $$r_rss{rss}{channel}{item}) {
+
+
                     my $item = $$r_rss{rss}{channel}{item}[$i];
+                    $$item{t} = $t;
                     push @all_items,$item;
                 }
             }
@@ -119,34 +122,36 @@ if ($query && $type) {
 
         foreach my $item (@all_items) {
 
-            if ($type eq 'google_news') {
+            if ($$item{t} eq 'google_news') {
                 $$item{link}{'$t'} =~ s/http:\/\/news\.google\.com\/news\/url(.*?)&url=(.*?)$/$2/;
+                utf8::decode($$item{title}{'$t'});
+                utf8::decode($$item{description}{'$t'});
                 #print $$item{link}{'$t'} ."\n";
 
                 my $hs = HTML::Restrict->new();
                 $$item{description}{'$t'} = $hs->process($$item{description}{'$t'});
 
             }
-            elsif ($type eq 'reddit') {
+            elsif ($$item{t} eq 'reddit') {
                 my $hs = HTML::Restrict->new();
                 $$item{description}{'$t'} = $hs->process($$item{description}{'$t'});
 
             }
-            elsif ($type eq 'faroo_news') {
+            elsif ($$item{t} eq 'faroo_news') {
                  my $hs = HTML::Restrict->new();
                  $$item{description}{'$t'} = $hs->process($$item{description}{'$t'});
             }
-            elsif ($type eq 'bing_news') {
+            elsif ($$item{t} eq 'bing_news') {
 
                 $$item{link}{'$t'} =~ s/http:\/\/www\.bing\.com\/news\/apiclick\.aspx(.*?)&url=(.*?)&(.*?)$/$2/;
 
                 $$item{link}{'$t'} = uri_decode($$item{link}{'$t'});
             }
-            elsif ($type eq 'google_blog') {
+            elsif ($$item{t} eq 'google_blog') {
               $$item{pubDate}{'$t'} = $$item{'dc$date'}{'$t'};
 
             }
-            elsif ($type eq 'yahoo_news') {
+            elsif ($$item{t} eq 'yahoo_news') {
 
                 $$item{link}{'$t'} =~ s/http\:\/\/ri\.search\.yahoo\.com\/(.*?)\/RU=(.*?)\/RK(.*?)$/$2/;
 
@@ -189,9 +194,10 @@ if ($query && $type) {
 
             #dd($item);
             $count++;
-            $perl_response{'res'} 		= $$r_rss{rss}{channel}{item};
+            #$perl_response{'res'} 		= $$r_rss{rss}{channel}{item};
 
         }
+        $perl_response{'res'} 		= \@all_items;
         $perl_response{'count'} 	= $count;
     }
 
@@ -205,11 +211,10 @@ my $json_response   = $json->pretty->encode(\%perl_response);
 #utf8::encode($json_response);
 if ($out eq 'rss') {
     print "Content-type: application/rss+xml\n\n";
-    my $rss_str =  $new_feed->to_string();
+    my $rss_str =  $new_feed->to_string(indent=>4);
 
 
-   # my $octets    = decode('UTF-8', $rss_str, Encode::FB_DEFAULT);
-   # my $good_utf8 = encode('UTF-8', $octets,         Encode::FB_CROAK);
+    #utf8::encode($rss_str);
     print $rss_str;
 }
 else {
@@ -223,6 +228,7 @@ else {
         # Header for access via browser, curl, etc.
         print "Content-type: application/json\n\n";
     }
+
     print $json_response;
 }
 
@@ -258,7 +264,8 @@ sub get_rss {
 	if (($response->is_success) || ($response->is_redirect)) {
 		my $rss = $response->content;
 
-
+        #utf8::decode($rss);
+        #utf8::decode($rss);
         #if ($type eq 'google_news') {
             #special conversion for google_news
 
@@ -266,7 +273,7 @@ sub get_rss {
             #$rss =~ s/&quot;http:\/\/news\.google\.com\/news\/url//g;
 
         #}
-        #utf8::decode($rss);
+
 
 		my $XML2JSON = XML::XML2JSON->new();
         my $JSON = $XML2JSON->convert($rss);
