@@ -29,6 +29,8 @@ use JSON;
 use HTML::Restrict;
 use HTML::Entities;
 use CGI;
+use Try::Tiny;
+use LWP::Simple;
 
 #### init
 
@@ -108,42 +110,54 @@ my $response = my $res = $ua->get($url_page);
 
 my $c = 0;
 if ($response->is_success) {
-    my $feed = XML::FeedPP->new($response->content);
+    #Try if it is a RSS fedd
+    try{
+        my $feed = XML::FeedPP->new($response->content);
 
+        $perl_response{'title'}         = $feed->title();
+        $perl_response{'description'}   = $feed->description();
+        $perl_response{'date'}          = $feed->pubDate();
+        #$feed->copyright( $text );
+        #$feed->link( $url );
+        $perl_response{'lang'}          = $feed->language();
+        $perl_response{'sourceType'}    = 'RSS';
 
-    $perl_response{'title'}         = $feed->title();
-    $perl_response{'description'}   = $feed->description();
-    $perl_response{'date'}          = $feed->pubDate();
-    #$feed->copyright( $text );
-    #$feed->link( $url );
-    $perl_response{'lang'}          = $feed->language();
+        foreach my $item ( $feed->get_item() ) {
+            my $link        = $item->link();
+            my $title       = $item->title();
+            my $description = $item->description();
 
-    foreach my $item ( $feed->get_item() ) {
-        my $link        = $item->link();
-        my $title       = $item->title();
-        my $description = $item->description();
+            # my $hs = HTML::Restrict->new();
+            # $description = $hs->process($description);
+            # decode_entities($description);
 
-        my $hs = HTML::Restrict->new();
-        $description = $hs->process($description);
-        decode_entities($description);
+            my $date        = $item->pubDate();
+            my %items;
+            $items{link}         = $link;
+            $items{title}        = $title;
+            $items{description}  = $description;
+            $items{date}         = $date;
+            push @{$perl_response{'items'}},\%items;
 
-        my $date        = $item->pubDate();
-        my %items;
-        $items{link}         = $link;
-        $items{title}        = $title;
-        $items{description}  = $description;
-        $items{date}         = $date;
-        push @{$perl_response{'items'}},\%items;
+            $c++;
+        }
+        $perl_response{'count'} = $c;
 
-        $c++;
+        if ($c<1) {
+            $perl_response{'error'} ='rss-link-not-found';
+        }
+        else {
+           $perl_response{'error'} = 'none';
+        }
     }
-    $perl_response{'count'} = $c;
-
-    if ($c<1) {
-        $perl_response{'error'} ='rss-link-not-found';
-    }
-    else {
-       $perl_response{'error'} = 'none';
+    catch{
+        $perl_response{'error'} = 'none';
+        $perl_response{'info'}  = 'Not a RSS Feed';
+        $perl_response{'sourceType'} = 'HTTP';
+        my $html = get($url_page);
+        #Get title name of the page
+        ($perl_response{'title'}) = $html =~ m/<title>(.+)<\/title>/si;
+        $c = 1;
     }
 }
 else {
@@ -168,6 +182,3 @@ if ($callback) {
 }
 
 print $json_response;
-
-
-
