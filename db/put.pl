@@ -60,6 +60,7 @@ my $db_widget_type          = $cfg->param('db_widget_type');
 my $db_enable               = $cfg->param('db_enable');
 my $db_weight               = $cfg->param('db_weight');
 
+
 # current date
 my $tm = localtime;
 my $str_now = sprintf("%04d-%02d-%02d".'T'. "%02d:%02d:%02d".'Z', $tm->year+1900,($tm->mon)+1, $tm->mday, $tm->hour, $tm->min, $tm->sec);
@@ -89,6 +90,7 @@ else {
         my %source;
         $source{$db_url}    = $$cgi{$db_url};
         $source{$db_user}   = $$cgi{$db_user};
+        $source{'waiting_b'}= $$cgi{waiting_b};
         $source{id}         = $id;
         my $crawl_link  = 'false';
         my $indexing    = 'true';

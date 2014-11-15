@@ -27,6 +27,8 @@ use HTML::Restrict;
 use URI::Encode qw(uri_encode uri_decode);
 use HTML::Entities;
 use utf8;
+use XML::FeedPP;
+use Encode qw(decode encode);
 
 
 my $service = {
@@ -64,6 +66,7 @@ my $q       = CGI->new;
 my $callback	= q{};
 my $query		= q{};
 my $type        = q{};
+my $out         = 'json';
 
 my $json    	= JSON->new->allow_nonref;
 my %perl_response = (
@@ -81,6 +84,13 @@ if ($q->param('typeQuery')) {
        $type    = $q->param('typeQuery');
    }
 
+
+if ($q->param('out')) {
+       $out    = $q->param('out');
+   }
+
+my $new_feed = XML::FeedPP::RSS->new(title => 'webso online search', description =>'webso online search', link => 'http://localhost' );
+$new_feed->xmlns('xmlns:media' => 'http://search.yahoo.com/mrss/');
 
 if ($query && $type) {
         $type =~ s/,$//g;
@@ -106,6 +116,7 @@ if ($query && $type) {
      #dd($r_rss);
 
         my $count = 0;
+
         foreach my $item (@all_items) {
 
             if ($type eq 'google_news') {
@@ -155,6 +166,7 @@ if ($query && $type) {
             # clean content
 
             $$item{description} = clean_content($$item{description});
+            $$item{description} = clean_content($$item{description});
             $$item{title}       = clean_content($$item{title});
 
             $$item{description} = highlight_keywords($$item{description},$query);
@@ -169,6 +181,12 @@ if ($query && $type) {
                     delete $$item{$k};
                 }
             }
+            my $new_item = $new_feed->add_item();
+            $new_item->title($$item{title});
+            $new_item->description($$item{description});
+            $new_item->link($$item{link});
+            $new_item->pubDate($$item{pubDate});
+
             #dd($item);
             $count++;
             $perl_response{'res'} 		= $$r_rss{rss}{channel}{item};
@@ -182,19 +200,31 @@ else {
 }
 
 my $json_response   = $json->pretty->encode(\%perl_response);
-if ($callback) {
-    print 'Access-Control-Allow-Origin: *';
-    print 'Access-Control-Allow-Methods: GET';
-    print "Content-type: application/javascript\n\n";
-    $json_response   = $callback.'('.$json_response.');';
 
-} else {
-    # Header for access via browser, curl, etc.
-    print "Content-type: application/json\n\n";
+
+#utf8::encode($json_response);
+if ($out eq 'rss') {
+    print "Content-type: application/rss+xml\n\n";
+    my $rss_str =  $new_feed->to_string();
+
+
+   # my $octets    = decode('UTF-8', $rss_str, Encode::FB_DEFAULT);
+   # my $good_utf8 = encode('UTF-8', $octets,         Encode::FB_CROAK);
+    print $rss_str;
 }
+else {
+    if ($callback) {
+        print 'Access-Control-Allow-Origin: *';
+        print 'Access-Control-Allow-Methods: GET';
+        print "Content-type: application/javascript\n\n";
+        $json_response   = $callback.'('.$json_response.');';
 
-utf8::encode($json_response);
-print $json_response;
+    } else {
+        # Header for access via browser, curl, etc.
+        print "Content-type: application/json\n\n";
+    }
+    print $json_response;
+}
 
 #####################################
 # get_rss
@@ -236,9 +266,11 @@ sub get_rss {
             #$rss =~ s/&quot;http:\/\/news\.google\.com\/news\/url//g;
 
         #}
-        utf8::decode($rss);
+        #utf8::decode($rss);
+
 		my $XML2JSON = XML::XML2JSON->new();
         my $JSON = $XML2JSON->convert($rss);
+
         $r_json = $json->decode($JSON);
 
 
@@ -246,7 +278,8 @@ sub get_rss {
 	else {
 		print STDERR $response->message;
 	}
-	return $r_json;
+	#$r_json =~ s/[\x00-\x08\x0B\x0C\x0E-\x1F]//g;
+    return $r_json;
 
 }
 
@@ -256,6 +289,7 @@ sub clean_content {
     my $content = shift @_;
 
     $content = decode_entities($content);
+
 
     return $content;
 
