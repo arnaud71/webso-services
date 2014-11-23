@@ -11,29 +11,48 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Log::Log4perl qw(:easy);
 use Time::localtime;
 use FindBin qw($Bin);
-use lib "$Bin/../lib";
+use lib "$Bin/";
 
 
 
-my $json    = JSON->new->allow_nonref;
+my $json;
+my $cfg;
+my $webso_services;
+my $tika_text;
 
-my $cfg             = new Config::Simple('webso.cfg');
-my $webso_services  = $cfg->param('webso_services');
-my $tika_text       = $cfg->param('tika_text');
 
-
-my $db_url                  = $cfg->param('db_url');
-my $db_type                 = $cfg->param('db_type');
-my $db_user                 = $cfg->param('db_user');
-my $db_level_sharing        = $cfg->param('db_level_sharing');
-my $db_source_type          = $cfg->param('db_source_type');
-
+my $db_url;
+my $db_type;
+my $db_user;
+my $db_level_sharing;
+my $db_source_type;
 
 # init user_agent
-my $ua = LWP::UserAgent->new;
-$ua->timeout(1000);
-#$ua->env_proxy;
+my $ua;
 
+sub init() {
+
+    my $dir = shift @_;
+
+    $json    = JSON->new->allow_nonref;
+
+    #print "$dir/webso.cfg\n";
+
+    $cfg                = new Config::Simple("$dir/webso.cfg");
+    $webso_services     = $cfg->param('webso_services');
+    $tika_text          = $cfg->param('tika_text');
+    $db_url             = $cfg->param('db_url');
+    $db_type            = $cfg->param('db_type');
+    $db_user            = $cfg->param('db_user');
+    $db_level_sharing   = $cfg->param('db_level_sharing');
+    $db_source_type     = $cfg->param('db_source_type');
+
+
+    # init user_agent
+    $ua = LWP::UserAgent->new;
+    $ua->timeout(1000);
+
+}
 
 ######################################################################
 #

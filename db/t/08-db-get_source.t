@@ -10,7 +10,7 @@ use Data::Dump qw(dd);
 
 my $json    = JSON->new->allow_nonref;
 
-my $cfg = new Config::Simple('../../webso.cfg');
+my $cfg = new Config::Simple('webso.cfg');
 my $webso_services = $cfg->param('webso_services');
 
 
@@ -23,16 +23,14 @@ my $db_source_type          = $cfg->param('db_source_type');
 
 
 
+
 my %source = (
     $db_url              => 'http://feeds.sciencedaily.com/sciencedaily/matter_energy/nanotechnology',
     $db_type             => 'source',
-    $db_user             => 'user_1',
+    $db_user             => 'administrateur',
     $db_level_sharing    => 1,
     $db_source_type      => 'rss',
 );
-
-
-
 
 
 # init user_agent
@@ -41,25 +39,24 @@ $ua->timeout(10);
 $ua->env_proxy;
 
 
-$source{$db_url} = uri_encode($source{$db_url});
 
 #my $params = '?source_url='.$url_encoded.'&source_type='.$source{source_type_s}.'&source_user='.$source{source_user_s}.'&source_level_sharing='.$source{source_level_sharing_i};
 
-my $params = '?'.$db_url.'='.$source{$db_url}
-             .'&'.$db_type.'='.$source{$db_type}
+my $params = '?'.$db_type.'='.$source{$db_type}
              .'&'.$db_user.'='.$source{$db_user}
-             .'&'.$db_level_sharing.'='.$source{$db_level_sharing}
-             .'&'.$db_source_type.'='.$source{$db_source_type}
+             .'&'.$db_url.'='.$source{$db_url}
              ;
 
-my $response = $ua->get($webso_services.'db/put.pl'.$params);
+my $response = $ua->get($webso_services.'db/get.pl'.$params);
+#print $webso_services.'db/get.pl'.$params;
 
 if ($response->is_success) {
-     print $response->decoded_content;  # or whatever
+     #print $response->decoded_content;  # or whatever
+
 
      my $r_json = $json->decode( $response->decoded_content);
-     #dd($r_json);
-     #exit;
+     dd($r_json);
+     exit;
 
      # test if success in the response
      isnt($$r_json{success}, undef, "success need to be defined");
@@ -80,5 +77,3 @@ if ($response->is_success) {
  else {
      die $response->status_line;
 }
-
-

@@ -20,6 +20,8 @@ use Config::Simple;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use Time::localtime;
 use HTML::Restrict;
+
+use FindBin qw($Bin);
 use Tools;
 
 
@@ -40,8 +42,8 @@ my $callback = q{};
 # print $q->header('application/json');
 
 # reading the conf file
-my $cfg     = new Config::Simple('../webso.cfg');
-
+my $cfg     = new Config::Simple("$Bin/../webso.cfg");
+&Tools::init("$Bin/..");
 
 my $db_type                 = $cfg->param('db_type');
 my $db_user                 = $cfg->param('db_user');
