@@ -72,6 +72,8 @@ my $json    	= JSON->new->allow_nonref;
 my %perl_response = (
     );
 
+$perl_response{'error'} = 'none';
+
 if ($q->param('callback')) {
     $callback    = $q->param('callback');
 }

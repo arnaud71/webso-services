@@ -17,7 +17,7 @@ use lib "$Bin/../lib";
 
 my $json    = JSON->new->allow_nonref;
 
-my $cfg             = new Config::Simple('../webso.cfg');
+my $cfg             = new Config::Simple('webso.cfg');
 my $webso_services  = $cfg->param('webso_services');
 my $tika_text       = $cfg->param('tika_text');
 

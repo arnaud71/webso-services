@@ -68,7 +68,8 @@ if ($q->param('url')) {
         $url    = $q->param('url');
 }
 else {
-    $url     = 'http://news.google.com/news?pz=1&cf=all&ned=fr_ch&hl=fr&output=rss&q=iphone';
+    #$url     = 'http://news.google.com/news?pz=1&cf=all&ned=fr_ch&hl=fr&output=rss&q=iphone';
+    $url     = 'http://feeds.feedburner.com/bitem/news';
 }
 
 
@@ -78,6 +79,18 @@ if ($q->param('crawl_link')) {
 else {
     $crawl_link     = 'true';
 }
+
+if ($q->param('nb')) {
+        $nb    = $q->param('nb');
+}
+else {
+    $nb     = '0';
+}
+
+if ($q->param('callback')) {
+    $callback    = $q->param('callback');
+}
+
 
 if ($url eq q{} ) {
     get_logger("crawler")->trace("url to crawl is empty");
@@ -108,6 +121,9 @@ if (($response->is_success) || ($response->is_redirect)) {
     my @tab_res;
     foreach my $item ( $feed->get_item() ) {
         # get meta-info from RSS
+        if (($nb!=0) && ($c+1>$nb)) {
+            last;
+        }
         my $link    = $item->link();
         if ($debug) {
                 print STDERR $link."\n";
@@ -199,7 +215,7 @@ if (($response->is_success) || ($response->is_redirect)) {
             $$h{title}          = $title;
             $$h{meta_content}   = $meta_content;
             $$h{date}           = $str_date;
-
+            $$h{nb}             = $c+1;
 
             push @tab_res, $h;
             $c++;

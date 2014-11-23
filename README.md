@@ -52,3 +52,17 @@ sudo perl init.pl
 
 vi webso.cfg (proxy = 1)
 
+
+Perl Testing
+-------------------
+prove t/
+
+
+naming of test:
+
+02_harvester-fetcher_run.t
+
+test number 02
+in directory harvester/ 
+file fetcher_run.pl
+
