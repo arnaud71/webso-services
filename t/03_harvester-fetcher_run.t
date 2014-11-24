@@ -1,7 +1,7 @@
 # test the fetcher_run
 use strict;
 
-use Test::More tests => 12; # currently 3 by urls
+use Test::More tests => 6; # currently 3 by urls
 use LWP::UserAgent;
 use Config::Simple;
 use URI::Encode qw(uri_encode uri_decode);
@@ -18,7 +18,7 @@ push @tab_url,'http://feeds.feedburner.com/bitem/news';
 
 my $json    = JSON->new->allow_nonref;
 
-my $cfg = new Config::Simple('../../webso.cfg');
+my $cfg = new Config::Simple('webso.cfg');
 my $webso_services = $cfg->param('webso_services');
 
 

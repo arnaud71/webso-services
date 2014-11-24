@@ -112,6 +112,9 @@ my $c = 0;
 if ($response->is_success) {
     #Try if it is a RSS fedd
     try{
+		#my $str = $response->content;
+	    #utf8::decode($str);
+		#my $feed = XML::FeedPP->new($str);
         my $feed = XML::FeedPP->new($response->content);
 
         $perl_response{'title'}         = $feed->title();
@@ -181,4 +184,5 @@ if ($callback) {
     print "Content-type: application/json\n\n";
 }
 
+#utf8::encode($json_response);
 print $json_response;

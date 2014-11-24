@@ -1,7 +1,7 @@
 # test the check rss
 use strict;
 
-use Test::More tests => 15; # currently 3 by urls
+use Test::More tests => 6; # currently 3 by urls
 use LWP::UserAgent;
 use Config::Simple;
 use URI::Encode qw(uri_encode uri_decode);
@@ -33,7 +33,7 @@ push @tab_url,'http://www.tdg.ch/high-tech/rss.html';
 
 my $json    = JSON->new->allow_nonref;
 
-my $cfg = new Config::Simple('../../../webso.cfg');
+my $cfg = new Config::Simple('webso.cfg');
 my $webso_services = $cfg->param('webso_services');
 
 
@@ -48,6 +48,7 @@ foreach my $url (@tab_url) {
     my $response = $ua->get($webso_services.'harvester/RSS/check_rss.pl'.$params);
 
     if ($cfg->param('debug')) {
+
         print $webso_services.'harvester/RSS/check_rss.pl'.$params."\n";
     }
 

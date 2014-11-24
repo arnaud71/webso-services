@@ -1,5 +1,7 @@
+# test the tika service for lang detection
 use strict;
-use lib '..';
+use Test::More tests => 4;
+#use lib '..';
 use Tools;
 
 
@@ -11,14 +13,11 @@ my $text_it = ' comuni vengono considerati parte delle province per tutto ciò c
 
 
 my $lang    = Tools::extract_tika_lang(\$text_fr);
-print "$lang\n";
-
-
+ok($lang eq 'fr');
 my $lang    = Tools::extract_tika_lang(\$text_en);
-print "$lang\n";
-
+ok($lang eq 'en');
 my $lang    = Tools::extract_tika_lang(\$text_es);
-print "$lang\n";
-
+ok($lang eq 'es');
 my $lang    = Tools::extract_tika_lang(\$text_it);
-print "$lang\n";
+ok($lang eq 'it');
+
