@@ -17,15 +17,16 @@ use Log::Log4perl qw(:easy);
 use Time::localtime;
 use lib '..';
 use Tools;
+use FindBin qw($Bin);
 
 
 my $json    = JSON->new->allow_nonref;
 
-my $cfg                     = new Config::Simple('../webso.cfg');
+my $cfg                     = new Config::Simple('$Bin/../webso.cfg');
+&Tools::init("$Bin/..");
+
 my $webso_services          = $cfg->param('webso_services');
 my $db_type                 = $cfg->param('db_type');
-
-
 
 
 my $logconf = "

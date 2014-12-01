@@ -9,6 +9,7 @@ use Config::Simple;
 use URI::Encode qw(uri_encode uri_decode);
 use JSON;
 use Data::Dump qw(dd);
+use FindBin qw($Bin);
 
 my @tab_url;
 
@@ -17,7 +18,7 @@ push @tab_url,'http://www.tdg.ch/high-tech/rss.html';
 
 my $json    = JSON->new->allow_nonref;
 
-my $cfg = new Config::Simple('webso.cfg');
+my $cfg = new Config::Simple('$Bin/../webso.cfg');
 my $webso_services = $cfg->param('webso_services');
 
 
