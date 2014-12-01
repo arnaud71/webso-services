@@ -152,12 +152,15 @@ else {
             if ($k eq 'qt') {
                 $action = $$cgi{$k};
             }
-            elsif ($k ne 'callback') {
+            elsif (!($k eq 'callback' || $k eq 'json.wrf')) {
                 $query .= $k.'='.$$cgi{$k}.'&';
             }
         }
         if ($q->param('callback')) {
             $callback = $q->param('callback');
+        }
+        if ($q->param('json.wrf')) {
+            $callback = $q->param('json.wrf');
         }
 
         # init user_agent
@@ -169,7 +172,8 @@ else {
             'collection1/'.$action.'?'
             .$query);
             #.'&wt=json&indent=true');
-        #print $query_encoded;
+        $perl_response{success} = $query_encoded;
+        #die $query_encoded;
 
         my $response = $ua->get($cfg->param('ws_db').$query_encoded);
         #print $response->content;
