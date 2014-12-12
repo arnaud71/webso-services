@@ -57,6 +57,21 @@ my $message_headder = '<!DOCTYPE html>
         <h3 style="text-align: center; ">Inélio, votre plate-forme de veille intuitive et collaborative</h3>
     </td>
 </tr>';
+my $message_footer = '<tr>
+    <td colspan=2>
+        <p style="margin-top: 30px; text-align: center; ">Cordialement,<br>
+        L’équipe d’Inélio</p>
+    </td>
+    <td colspan=2>
+        <footer style="margin: 20px 30px; text-align: right; ">
+        <p>Mail : contact@inelio.fr<br>
+        Tel : +33 (0)6 75 68 41 04</p>
+    </footer>
+    </td>
+</tr>
+</table>
+</body>
+</html>';
 
 if (Config::Simple->error()) {
     push @{$perl_response{'error'}},'Config file error';
@@ -145,7 +160,7 @@ else {
                         To       => $mail,
                         Cc       => '',
                         Subject  => $response_text->{response}->{docs}[0]->{user_s}.' vous partage une information',
-                        Data     => $message_headder.$text.$message_data
+                        Data     => $message_headder.$text.$message_data.$message_footer
                     );
                     # $perl_response{'mail'} = $message_headder.$text.$message_data;
                     $msg->attr("content-type" => "text/html");
