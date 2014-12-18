@@ -26,9 +26,7 @@ my $cfg                     = new Config::Simple("$Bin/../webso.cfg");
 &Tools::init("$Bin/..");
 my $webso_services          = $cfg->param('webso_services');
 my $db_type                 = $cfg->param('db_type');
-
-
-
+my $db_source_type          = $cfg->param('db_source_type');
 
 my $logconf = "
     log4perl.logger.crawler                         = TRACE, crawlerAppender
@@ -52,31 +50,46 @@ my $ua = LWP::UserAgent->new;
 $ua->timeout(1000);
 #$ua->env_proxy;
 
-
-my $params = '?'.$db_type.'=source';
-my $response = $ua->get($webso_services.'db/get.pl'.$params);
-
+# my $params = '?'.$db_type.'=source&'.db_source_type.;
+# my $response = $ua->get($webso_services.'db/get.pl'.$params);
+my $start = 0;
+my $rows  = 10;
+my $params = '?qt=select&q=type_s:source&wt=json&indent=true';
+# my $params = '?qt=select&q=type_s%3Asource+AND+(source_type_s%3ARSS+OR+source_type_s%3Arss)&wt=json&indent=true';
+my $response = $ua->get($webso_services.'db/query.pl'.$params.'&start='.$start.'&rows='.$rows);
 
 if ($response->is_success) {
     my $error_msg = q{};
-    #print $response->decoded_content;  # or whatever
-    my $r_json = $json->decode( $response->content);
-    # check all services
-    my $i = 0;
-    while ($r_json->{success}{response}{docs}[$i]) {
-        my $source = $r_json->{success}{response}{docs}[$i];
-        #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
-        my $crawl_link      = 'true';
-        my $indexing        = 'true';
-        my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
-        $i++;
-        #exit;
+
+    my $r_json = $json->decode($response->content);
+    my $max = $r_json->{success}{response}{numFound};
+    my $j = 0; #Counter for the query loop
+    # print $response->content;
+
+    while ($j*$rows < $max){
+        my $i = 0;
+        if($j != 0){
+            $start = $j*$rows;
+            $response = $ua->get($webso_services.'db/query.pl'.$params.'&start='.$start.'&rows='.$rows);
+            $r_json = $json->decode($response->content);
+        }
+        # check all services
+        while ($r_json->{success}{response}{docs}[$i]) {
+            my $source = $r_json->{success}{response}{docs}[$i];
+            #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
+            my $crawl_link      = 'true';
+            my $indexing        = 'true';
+            # print $j.'-'.$i.'-'.$r_json->{success}{response}{docs}[$i]{url_s}."\n";
+            # my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
+            $i++;
+            #exit;
+        }
+        $j++;
     }
     #if ($error_msg) {
         #$$r_json_rss{error} = $error_msg;
     #}
 }
 else {
-     die $response->status_line;
+    die $response->status_line;
 }
-
