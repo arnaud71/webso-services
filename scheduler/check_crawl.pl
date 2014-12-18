@@ -18,6 +18,7 @@ use Time::localtime;
 use lib '..';
 use Tools;
 use FindBin qw($Bin);
+use POSIX ();
 
 
 my $json    = JSON->new->allow_nonref;
@@ -64,6 +65,7 @@ if ($response->is_success) {
     my $r_json = $json->decode($response->content);
     my $max = $r_json->{success}{response}{numFound};
     my $j = 0; #Counter for the query loop
+    my $time = time;
     # print $response->content;
 
     while ($j*$rows < $max){
@@ -75,12 +77,34 @@ if ($response->is_success) {
         }
         # check all services
         while ($r_json->{success}{response}{docs}[$i]) {
+            # Check if the source is to update according to the refresh rate
+            my ($year,$mon,$day,$hour,$min,$sec) = split(/[-T:Z]+/, $r_json->{success}{response}{docs}[$i]{updating_dt});
+            my $refresh = 0;
+            if($r_json->{success}{response}{docs}[$i]{refresh_s}){
+                $refresh = int(substr($r_json->{success}{response}{docs}[$i]{refresh_s}, 0, 2));
+            }
+            else{
+                $refresh = 12;
+            }
+            my $updatetime = POSIX::mktime(0, 0, $hour, $day, $mon-1, $year-1900)+($refresh*3600);
+            # Not time to update jump next
+            # print $updatetime.' - '.time."\n";
+            if($updatetime > $time) {
+                print 'Next crawl in '.int(($updatetime-$time)/3600)."h\n";
+                $i++;
+                next;
+            }
+
             my $source = $r_json->{success}{response}{docs}[$i];
             #$$doc{url_s} = 'http://feeds.feedburner.com/bitem/news';
             my $crawl_link      = 'true';
             my $indexing        = 'true';
             # print $j.'-'.$i.'-'.$r_json->{success}{response}{docs}[$i]{url_s}."\n";
+            print $r_json->{success}{response}{docs}[$i]{id}."\n";
             my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
+            # Update updating_dt to be refered for refresh rate
+            my $response_3 = $ua->get($webso_services.'db/change.pl?id='.$r_json->{success}{response}{docs}[$i]{id});
+            print $response_3->content;
             $i++;
             #exit;
         }
