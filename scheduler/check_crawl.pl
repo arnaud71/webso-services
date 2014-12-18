@@ -54,8 +54,8 @@ $ua->timeout(1000);
 # my $response = $ua->get($webso_services.'db/get.pl'.$params);
 my $start = 0;
 my $rows  = 10;
-my $params = '?qt=select&q=type_s:source&wt=json&indent=true';
-# my $params = '?qt=select&q=type_s%3Asource+AND+(source_type_s%3ARSS+OR+source_type_s%3Arss)&wt=json&indent=true';
+# my $params = '?qt=select&q=type_s:source&wt=json&indent=true';
+my $params = '?qt=select&q=type_s%3Asource+AND+(source_type_s%3ARSS+OR+source_type_s%3Arss)&wt=json&indent=true';
 my $response = $ua->get($webso_services.'db/query.pl'.$params.'&start='.$start.'&rows='.$rows);
 
 if ($response->is_success) {
@@ -80,7 +80,7 @@ if ($response->is_success) {
             my $crawl_link      = 'true';
             my $indexing        = 'true';
             # print $j.'-'.$i.'-'.$r_json->{success}{response}{docs}[$i]{url_s}."\n";
-            # my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
+            my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
             $i++;
             #exit;
         }
