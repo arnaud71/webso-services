@@ -101,7 +101,13 @@ if ($response->is_success) {
             my $indexing        = 'true';
             # print $j.'-'.$i.'-'.$r_json->{success}{response}{docs}[$i]{url_s}."\n";
             print $r_json->{success}{response}{docs}[$i]{id}."\n";
-            my $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
+            my $rss_json = '';
+            eval{
+                $rss_json = Tools::fetchDocSource($source,$crawl_link,$indexing);
+            } or do {
+                $i++;
+                next;
+            };
             # Update updating_dt to be refered for refresh rate
             my $response_3 = $ua->get($webso_services.'db/change.pl?id='.$r_json->{success}{response}{docs}[$i]{id});
             print $response_3->content;

@@ -125,8 +125,16 @@ if ($response->is_success) {
             # }
             # else { #child
                 # Query for each wait source using saved url (maybe problematic if domain name change)
-                $response_1 = $ua->get($r_json->{success}{response}{docs}[$i]{url_s});
-                my $content = $json->decode($response_1->content);
+                # $response_1 = $ua->get($r_json->{success}{response}{docs}[$i]{url_s});
+                print $r_json->{success}{response}{docs}[$i]{url_s}."\n";
+                $response_1 = $ua->get($webso_services.'harvester/QUERYSEARCH/get_querysearch.pl?query='.$r_json->{success}{response}{docs}[$i]{query_s}.'&typeQuery='.$r_json->{success}{response}{docs}[$i]{ressources_s});
+                my $content = '';
+                eval{
+                    $content = $json->decode($response_1->content);
+                } or do {
+                    $i++;
+                    next;
+                };
 
                 if ($response_1->is_success) {
                     # For each document in the waiting source
