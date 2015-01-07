@@ -35,14 +35,14 @@ my $json    = JSON->new->allow_nonref;
 my $callback = q{};
 
 my %perl_response = (    
-    );
+	);
 
 # reading the conf file
 my $cfg     = new Config::Simple('../webso.cfg');
 
 if (Config::Simple->error()) {
-    push @{$perl_response{'error'}},'Config file error';
-    $perl_response{'debug_msg'} = Config::Simple->error();
+	push @{$perl_response{'error'}},'Config file error';
+	$perl_response{'debug_msg'} = Config::Simple->error();
 }
 else {
 	my $deb_mod = $cfg->param('debug');
@@ -53,6 +53,7 @@ else {
 #	my $db_compteur_sessions;
 	my $db_role;
 	my $db_token;
+	my $db_lang;
 	my $db_token_timeout;
 	my $db_creation_dt;
 	my $db_updating_dt;
@@ -76,15 +77,15 @@ else {
 	}
 
 
-    if (!(exists $perl_response{'error'})) {
-        # concatenate query and response
-        %perl_response = (%perl_response,%$cgi);
+	if (!(exists $perl_response{'error'})) {
+		# concatenate query and response
+		%perl_response = (%perl_response,%$cgi);
 
 
-        # init user_agent
-        my $ua = LWP::UserAgent->new;
-        $ua->timeout(10);
-        $ua->env_proxy;
+		# init user_agent
+		my $ua = LWP::UserAgent->new;
+		$ua->timeout(10);
+		$ua->env_proxy;
 
 	my $query_encoded_1;
 	my $query_encoded_2;
@@ -93,10 +94,10 @@ else {
 	my $response_3;
 	my $response_4;
 	
-        $query_encoded_1 = uri_encode(
-            "collection1/select?"
-	    .$query
-            .'&wt=json&indent=true');
+		$query_encoded_1 = uri_encode(
+			"collection1/select?"
+		.$query
+			.'&wt=json&indent=true');
 				
 	$response_1 = $ua->get($cfg->param('ws_db').$query_encoded_1);
 
@@ -122,11 +123,12 @@ else {
 							delete $$cgi{'callback'};
 
 							#Prepare change.pl request to avoid redundant code
-							$id	       = $response_text->{response}->{docs}[0]->{"id"};
-							$db_token  = $response_text->{response}->{docs}[0]->{"token_s"};
+							$id			= $response_text->{response}->{docs}[0]->{"id"};
+							$db_token	= $response_text->{response}->{docs}[0]->{"token_s"};
 							$db_token_timeout  = $response_text->{response}->{docs}[0]->{"token_timeout_l"};
 							$db_username	= $response_text->{response}->{docs}[0]->{"user_s"};
-							$db_role	 	= $response_text->{response}->{docs}[0]->{"role_s"};
+							$db_role		= $response_text->{response}->{docs}[0]->{"role_s"};
+							$db_lang		= $response_text->{response}->{docs}[0]->{"lang_s"};
 							# $db_compteur_sessions = $response_text->{response}->{docs}[0]->{"compteur_sessions_s"};
 
 							my $tm = time;
@@ -150,6 +152,7 @@ else {
 									$perl_response{success} = $json->decode( $response_4->decoded_content);
 									$perl_response{username} = $db_username;
 									$perl_response{role} = $db_role;
+									$perl_response{lang} = $db_lang;
 									$perl_response{token} = $db_token;
 									$perl_response{token_timeout} = $db_token_timeout;
 								}else {
@@ -176,34 +179,34 @@ else {
 					}else{
 						$perl_response{'error'} = "sources server or service: ".$response_2->code;
 						if ($deb_mod) {
-						    $perl_response{'debug_msg'} = $response_2->message;
+							$perl_response{'debug_msg'} = $response_2->message;
 						}
 					}
 				}else{
-				    $perl_response{'error'} = ' nom d\'utilisateur et/ou mot de passe incorrect(s)';
+					$perl_response{'error'} = ' nom d\'utilisateur et/ou mot de passe incorrect(s)';
 				}
-		        }else {
-		            $perl_response{'error'} = "sources server or service ".$response_1->code;
-		            if ($deb_mod) {
-		                $perl_response{'debug_msg'} = $response_1->message;
-		            }
-		        }
+				}else {
+				$perl_response{'error'} = "sources server or service ".$response_1->code;
+					if ($deb_mod) {
+						$perl_response{'debug_msg'} = $response_1->message;
+					}
+				}
 		}else{
 			$perl_response{'error'} = "Longueur du nom d'utilisateur et/ou du mot de passe doit/doivent être superieur(s) à 6 et inférieur(s) à 20 caractères";	
 		}
-    }
+	}
 }
 
 my $json_response = $json->pretty->encode(\%perl_response);
 
 if ($callback) { 
-    print 'Access-Control-Allow-Origin: *';
-    print 'Access-Control-Allow-Methods: GET'; 
-    print "Content-type: application/javascript; charset=utf-8\n\n";
-    $json_response   = $callback.'('.$json_response.');';
+	print 'Access-Control-Allow-Origin: *';
+	print 'Access-Control-Allow-Methods: GET'; 
+	print "Content-type: application/javascript; charset=utf-8\n\n";
+	$json_response   = $callback.'('.$json_response.');';
 } else { 
-    # Header for access via browser, curl, etc. 
-    print "Content-type: application/json\n\n"; 
+	# Header for access via browser, curl, etc. 
+	print "Content-type: application/json\n\n"; 
 } 
 
 print $json_response; 
