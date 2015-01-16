@@ -59,21 +59,42 @@ else {
 	my $db_updating_dt;
 
 	my $query 	= q{};
-	my $db_user = $$cgi{'user_s'};
-	my $pass 	= $$cgi{'password_s'};
-	my $db_password = md5_hex($pass);
+	my $pass 	= '';
+	my $db_password = '';
 	my $db_bcrypt;
 
-	my $lengthUsername = length($db_user);
-	my $lengthPassword = length($pass);
+	my $lengthUsername = 0;
+	my $lengthPassword = 0;
+
+	if($q->param('POSTDATA')){
+		my @var = $json->decode($$cgi{'POSTDATA'});
+		$pass = $var[0]{'password_s'};
+		$db_password = md5_hex($pass);
+		$query 	= 'q='.'user_s:'.$var[0]{'user_s'}.' AND password_s:'.$db_password;
+
+		$lengthUsername = length($var[0]{'user_s'});
+		$lengthPassword = length($pass);
+
+		if ($var[0]{'callback'}) {
+			$callback = $var[0]{'callback'};
+		}
+	}
+	else{
+		$pass = $$cgi{'password_s'};
+		$db_password = md5_hex($pass);
+		$query 	= 'q='.'user_s:'.$$cgi{'user_s'}.' AND password_s:'.$db_password;
+
+		$lengthUsername = length($$cgi{'user_s'});
+		$lengthPassword = length($pass);
+	}
+	print $query;
+
 	if($lengthPassword != 0){
 		bcrypt->crypt($pass);
 	}
 
-	$query 	= 'q='.'user_s:'.$db_user.' AND password_s:'.$db_password;
-
 	if ($q->param('callback')) {
-		$callback    = $q->param('callback');
+		$callback = $q->param('callback');
 	}
 
 
