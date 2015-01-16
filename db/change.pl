@@ -12,6 +12,7 @@
 #
 # Contributors:
 #   - Arnaud Gaudinat : 11/08/2014
+#   - Clément MILLET  : 16/01/2015
 ######################################################################
 
 use strict;
@@ -62,13 +63,17 @@ else {
                 if ($k eq 'id') {
                     $query .= '"id":"'.$$cgi{$k}.'",';
                 }
-                else {
-                    if($k eq 'password_s'){
-                        $query .= '"'.$k.'":{"set":"'.md5_hex($$cgi{$k}).'"},';
-                    }
-                    else{
-                        $query .= '"'.$k.'":{"set":"'.$$cgi{$k}.'"},';
-                    }
+                elsif($k eq 'password_s'){
+                    $query .= '"'.$k.'":{"set":"'.md5_hex($$cgi{$k}).'"},';
+                }
+                elsif($k eq 'password_hash'){
+                    $query .= '"password_s":{"set":"'.$$cgi{$k}.'"},';
+                }
+                elsif($k eq 'password_s'){
+                    $query .= '"password_s":{"set":"'.md5_hex($$cgi{$k}).'"},';
+                }
+                else{
+                    $query .= '"'.$k.'":{"set":"'.$$cgi{$k}.'"},';
                 }
             }
         }
@@ -86,13 +91,14 @@ else {
                     if ($k eq 'id') {
                         $query .= '"id":"'.$var[0]{$k}.'",';
                     }
-                    else {
-                        if($k eq 'password_hash' && $var[0]{$k} eq 'false'){
-                            $query .= '"password_s":{"set":"'.md5_hex($var[0]{$k}).'"},';
-                        }
-                        else{
-                            $query .= '"'.$k.'":{"set":"'.$var[0]{$k}.'"},';
-                        }
+                    elsif($k eq 'password_hash'){
+                        $query .= '"password_s":{"set":"'.$var[0]{$k}.'"},';
+                    }
+                    elsif($k eq 'password_s'){
+                        $query .= '"password_s":{"set":"'.md5_hex($var[0]{$k}).'"},';
+                    }
+                    else{
+                        $query .= '"'.$k.'":{"set":"'.$var[0]{$k}.'"},';
                     }
                 }
             }
