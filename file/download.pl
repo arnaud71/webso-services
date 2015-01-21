@@ -65,9 +65,7 @@ else{
 my %perl_response = ();
 
 my $callback = q{};
-
-# print json header
-# print $q->header('application/json');
+my $response_text_1 = '';
 
 if ($fileID eq '') {
 	print "Content-type: text/htmlnn";
@@ -84,32 +82,20 @@ if ($fileID eq '') {
 				'&'.$cfg->param('db_token_timeout').'='.$token_timeout));
 
 		if ($response_1->is_success) {
-			my $response_text_1 = $json->decode($response_1->decoded_content);
+			$response_text_1 = $json->decode($response_1->decoded_content);
 			if($response_text_1->{success}->{response}->{numFound} eq 1){
+				#check if the user is in the share list or if it is his own file
 				my $response_2 = $ua->get($cfg->param('webso_services').
-						# uri_encode('/db/get.pl?'.
-						# 	$cfg->param('db_type').'='.$cfg->param('t_file').
-						# 	'&'.$cfg->param('db_id').'='.$fileID.
-						# 	'&'.$cfg->param('db_share').'='.$response_text_1->{success}->{response}->{docs}[0]->{id}));
-						uri_encode('/db/query.pl?'.
-							'qt=browse&fq='.
-							$cfg->param('db_type').':'.$cfg->param('t_file').
-							' AND '.$cfg->param('id').':'.$fileID.
-							' AND ('.$cfg->param('db_share').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.
-							' OR '.$cfg->param('db_user').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.')&'.
-							'wt=json&'.
-							'hl=true&'.
-							'indent=true'
-						));
-				print '/db/query.pl?'.
-							'qt=browse&fq="'.
-							$cfg->param('db_type').':'.$cfg->param('t_file').
-							' AND '.$cfg->param('id').':'.$fileID.
-							' AND ('.$cfg->param('db_share').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.
-							' OR '.$cfg->param('db_user').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.')"&'.
-							'wt=json&'.
-							'hl=true&'.
-							'indent=true';
+					uri_encode('/db/query.pl?'.
+						'qt=browse&fq='.
+						$cfg->param('db_type').':'.$cfg->param('t_file').
+						' AND '.$cfg->param('id').':'.$fileID.
+						' AND ('.$cfg->param('db_share').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.
+						' OR '.$cfg->param('db_user').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.')&'.
+						'wt=json&'.
+						'hl=true&'.
+						'indent=true'
+					));
 				if ($response_2->is_success) {
 					my $response_text_2 = $json->decode($response_2->decoded_content);
 					if($response_text_2->{success}->{response}->{numFound} eq 1){
@@ -136,15 +122,19 @@ if ($fileID eq '') {
 		}
 
 	my @fileholder;
+	# current date
+	my $time = localtime;
+	#log file downloads if we have reclamations.
 
 	open(DLFILE, "<$upload_folder/$file");# || Error('open', 'file');
 	@fileholder = <DLFILE>;
 	close (DLFILE) || Error ('close', 'file');
 
 	open (LOG, ">>$log_folder/download.log");# || Error('open', 'file');
-	##TODO Add severals informations Time, IP, username, ressource
-	print LOG "$file\n";
+	#Severals informations : Time, IP, username, ressource (hash and filename)
+	print LOG "[$time] \t $ENV{REMOTE_ADDR} \t $response_text_1->{success}->{response}->{docs}[0]->{user_s} \t $filename -> $file\n";
 	close (LOG);
+	undef *response_text_1;
 
 	print "Content-Type:application/x-download\n";
 	print "Content-Disposition:attachment;filename=$filename\n\n";
