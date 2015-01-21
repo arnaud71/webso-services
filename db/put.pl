@@ -61,6 +61,7 @@ my $db_title                = $cfg->param('db_title');
 my $db_widget_type          = $cfg->param('db_widget_type');
 my $db_enable               = $cfg->param('db_enable');
 my $db_weight               = $cfg->param('db_weight');
+my $db_waiting              = $cfg->param('db_waiting');
 
 
 # current date
@@ -92,7 +93,7 @@ else {
         my %source;
         $source{$db_url}    = $$cgi{$db_url};
         $source{$db_user}   = $$cgi{$db_user};
-        $source{'waiting_b'}= $$cgi{waiting_b};
+        $source{$db_waiting}= $$cgi{$db_waiting};
         $source{id}         = $id;
         my $crawl_link  = 'false';
         my $indexing    = 'true';
@@ -102,15 +103,14 @@ else {
 
     }
     if ($$cgi{$db_type} eq $cfg->param('t_validation')) {
-        $id = 'v_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #add v_ for validation
+        $id = 'v_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$$cgi{$db_title});
     }
     if ($$cgi{$db_type} eq $cfg->param('t_user')) {
-        $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password}); #add e_ for user
+        $id = 'u_'.md5_hex($$cgi{$db_user}.$$cgi{$db_password});
         $$cgi{$db_password} = md5_hex($$cgi{$db_password});
-        $$cgi{$db_role}     = $$cgi{$db_role};
     }
     if ($$cgi{$db_type} eq $cfg->param('t_document')) {
-        $id = 'd_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}); #
+        $id = 'd_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
     }
     if ($$cgi{$db_type} eq $cfg->param('t_report')) {
         $id = 'r_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url});
@@ -135,7 +135,11 @@ else {
     }
 
     if ($$cgi{$db_type} eq $cfg->param('t_tree')) {
-            $id = 't_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title});
+        $id = 't_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title});
+    }
+
+    if($$cgi{$db_type} eq 'file'){
+        $id = 'f_'.$$cgi{'file_s'};
     }
 
     if ($q->param('callback')) {
