@@ -6,9 +6,8 @@
 # download script to check if you are allowed to download the ressource you request
 #
 # inputs:
-#   token
-#   token_timeout
-#   file
+#   token & token_timeout : user auth params
+#   file : ID of the file you want to downlaod
 #
 # Contributors:
 #   - Clément MILLET : 21/01/2015
@@ -39,7 +38,6 @@ if (Config::Simple->error()) {
 my $json    = JSON->new->allow_nonref;
 
 my $q        = CGI->new;
-my $cgi      = $q->Vars;
 my $file     = '';
 my $filename = '';
 my $fileID   = '';
@@ -51,7 +49,7 @@ my $deb_mod       = $cfg->param('debug');
 
 #Check if call from POST or GET method
 if ($q->param('POSTDATA')) {
-	my @var = $json->decode($$cgi{'POSTDATA'});
+	my @var = $json->decode($q->param('POSTDATA'));
 	$fileID = $var[0]{'fileID'};
 	$token = $var[0]{'token'};
 	$token_timeout = $var[0]{'token_timeout'};
@@ -65,61 +63,61 @@ else{
 my %perl_response = ();
 
 my $callback = q{};
-my $response_text_1 = '';
 
 if ($fileID eq '') {
-	print "Content-type: text/htmlnn";
-	print "You must specify a file to download.";
+	print "Content-type: text/html\n\n";
+	print "You must specify a file to download.\n";
 	$perl_response{error} = "You must specify a file to download.";
 } else {
 
 	my $ua = LWP::UserAgent->new;
 
-		my $response_1 = $ua->get($cfg->param('webso_services').
-			uri_encode('/db/get.pl?'.
-				$cfg->param('db_type').'='.$cfg->param('t_user').
-				'&'.$cfg->param('db_token').'='.$token.
-				'&'.$cfg->param('db_token_timeout').'='.$token_timeout));
+	my $response_1 = $ua->get($cfg->param('webso_services').
+		uri_encode('/db/get.pl?'.
+			$cfg->param('db_type').'='.$cfg->param('t_user').
+			'&'.$cfg->param('db_token').'='.$token.
+			'&'.$cfg->param('db_token_timeout').'='.$token_timeout));
 
-		if ($response_1->is_success) {
-			$response_text_1 = $json->decode($response_1->decoded_content);
-			if($response_text_1->{success}->{response}->{numFound} eq 1){
-				#check if the user is in the share list or if it is his own file
-				my $response_2 = $ua->get($cfg->param('webso_services').
-					uri_encode('/db/query.pl?'.
-						'qt=browse&fq='.
-						$cfg->param('db_type').':'.$cfg->param('t_file').
-						' AND '.$cfg->param('id').':'.$fileID.
-						' AND ('.$cfg->param('db_share').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.
-						' OR '.$cfg->param('db_user').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.')&'.
-						'wt=json&'.
-						'hl=true&'.
-						'indent=true'
-					));
-				if ($response_2->is_success) {
-					my $response_text_2 = $json->decode($response_2->decoded_content);
-					if($response_text_2->{success}->{response}->{numFound} eq 1){
-						$filename = $response_text_2->{success}->{response}->{docs}[0]->{filename_s};
-						$file     = $response_text_2->{success}->{response}->{docs}[0]->{file_s};
-					}
-					else{
-						$perl_response{error} = "You don't have the rights to download this file.";
-					}
-				}else{
-					$perl_response{error} = "sources server or service2: ".$response_2->code;
-					if ($deb_mod) {
-						$perl_response{debug_msg} = $response_2->message;
-					}
+	my $response_text_1 = '';
+	if ($response_1->is_success) {
+		$response_text_1 = $json->decode($response_1->decoded_content);
+		if($response_text_1->{success}->{response}->{numFound} eq 1){
+			#check if the user is in the share list or if it is his own file
+			my $response_2 = $ua->get($cfg->param('webso_services').
+				uri_encode('/db/query.pl?'.
+					'qt=browse&fq='.
+					$cfg->param('db_type').':'.$cfg->param('t_file').
+					' AND '.$cfg->param('id').':'.$fileID.
+					' AND ('.$cfg->param('db_share').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.
+					' OR '.$cfg->param('db_user').':'.$response_text_1->{success}->{response}->{docs}[0]->{id}.')&'.
+					'wt=json&'.
+					'hl=true&'.
+					'indent=true'
+				));
+			if ($response_2->is_success) {
+				my $response_text_2 = $json->decode($response_2->decoded_content);
+				if($response_text_2->{success}->{response}->{numFound} eq 1){
+					$filename = $response_text_2->{success}->{response}->{docs}[0]->{filename_s};
+					$file     = $response_text_2->{success}->{response}->{docs}[0]->{file_s};
+				}
+				else{
+					$perl_response{error} = "You don't have the rights to download this file.";
 				}
 			}else{
-				$perl_response{error} = "No account available";
+				$perl_response{error} = "sources server or service2: ".$response_2->code;
+				if ($deb_mod) {
+					$perl_response{debug_msg} = $response_2->message;
+				}
 			}
 		}else{
-			$perl_response{error} = "sources server or service1: ".$response_1->code;
-			if ($deb_mod) {
-				$perl_response{debug_msg} = $response_1->message;
-			}
+			$perl_response{error} = "No account available";
 		}
+	}else{
+		$perl_response{error} = "sources server or service1: ".$response_1->code;
+		if ($deb_mod) {
+			$perl_response{debug_msg} = $response_1->message;
+		}
+	}
 
 	my @fileholder;
 	# current date
