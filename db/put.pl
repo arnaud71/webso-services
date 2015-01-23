@@ -76,6 +76,10 @@ else {
     my $deb_mod = $cfg->param('debug');
     my $id = q{};
 
+    if($q->param('POSTDATA')){
+        my @var = $json->decode($$cgi{'POSTDATA'});
+        $cgi = $var[0];
+    }
 
     # create id depending of type of object
     # if source type
