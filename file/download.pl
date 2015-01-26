@@ -1,4 +1,4 @@
-#!/usr/bin/perl -wT
+#!/usr/bin/perl
 
 ######################################################################
 # file/download.pl
@@ -117,6 +117,14 @@ if ($fileID eq '') {
 		if ($deb_mod) {
 			$perl_response{debug_msg} = $response_1->message;
 		}
+	}
+
+	if (exists $perl_response{'error'}) {
+		# my $json_response   = $json->pretty->encode(\%perl_response);
+		# $json_response   = $callback.'('.$json_response.');';
+		print "Content-type: application/json\n\n";
+		print $perl_response{error}."\n";
+		exit 1;
 	}
 
 	my @fileholder;
