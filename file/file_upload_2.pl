@@ -7,6 +7,7 @@ use JSON;
 use LWP::UserAgent;
 use Config::Simple;
 use File::Basename;
+use File::MimeInfo;
 use String::Random;
 use URI::Encode qw(uri_encode uri_decode);
 use FindBin qw($Bin);
@@ -45,7 +46,7 @@ if ( !$filename ){
 }
 else{
 
-	my ( $name, $path, $extension ) = fileparse ( $filename, '..*' );
+	my ( $name, $path, $extension ) = fileparse ( $filename, qr"((\.[^.\s]+)+)$" );
 	$filename = $name . $extension;
 	$filename =~ tr/ /_/;
 	$filename =~ s/[^$safe_filename_characters]//g;
@@ -88,11 +89,14 @@ else{
 	if ($response_1->is_success) {
 		my $response_text_1 = $json->decode($response_1->decoded_content);
 		if($response_text_1->{success}->{response}->{numFound} eq 1){
+			my $mime_type = mimetype($filename);
 			my $response_2 = $ua->get($cfg->param('webso_services').
 				uri_encode('/db/put.pl?'.
 					$cfg->param('db_type').'='.$cfg->param('t_file').
 					'&'.$cfg->param('db_filename').'='.$filename.
 					'&'.$cfg->param('db_file_id').'='.$alea.
+					'&'.$cfg->param('db_mime_type').'='.$mime_type.
+					'&'.$cfg->param('db_file_extension').'='.$extension.
 					'&'.$cfg->param('db_user').'='.$response_text_1->{success}->{response}->{docs}[0]->{id}));
 			# my $response_2 = $ua->get($cfg->param('webso_services').uri_encode('/db/put.pl?type_s=file&filename_s='.$filename.'&file_s='.$alea.'&user_s='.$response_text_1->{success}->{response}->{docs}[0]->{id}));
 			if ($response_2->is_success) {
