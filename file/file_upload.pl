@@ -1,144 +1,141 @@
-#!/usr/bin/perl
-#
-# file_upload.pl - Demonstration script for file uploads
-# over HTML form.
-#
-# This script should function as is.  Copy the file into
-# a CGI directory, set the execute permissions, and point
-# your browser to it. Then modify if to do something
-# useful.
-#
-# Author: Kyle Dent
-# Date: 3/15/01
-#
+#!/usr/bin/perl -w
 
-use CGI;
 use strict;
+use CGI;
+use CGI::Carp qw ( fatalsToBrowser );
+use JSON;
+use LWP::UserAgent;
+use Config::Simple;
+use File::Basename;
+use File::MimeInfo;
+use String::Random;
+use URI::Encode qw(uri_encode uri_decode);
+use FindBin qw($Bin);
 
-my $PROGNAME = "file_upload.pl";
+# reading the conf file
+my $cfg     = new Config::Simple("$Bin/../webso.cfg");
+if (Config::Simple->error()) {
+	exit 1;
+}
 
-my $cgi = new CGI();
+my $deb_mod = $cfg->param('debug');
+
 my $callback = q{};
-my $json_response ='';
-#print "Content-type: text/html\n\n";
+my %perl_response = ();
+my $json = JSON->new->allow_nonref;
 
-#
-# We're invoked from the form. Get the filename/handle.
-#
-my $upfile = $cgi->param('myFile');
+$CGI::POST_MAX = 1048576 * 10; #Mégabit * nb
+my $safe_filename_characters = "a-zA-Z0-9_.-";
+my $upload_dir = $cfg->param('file_upload_dir');
 
-#
-# Get the basename in case we want to use it.
-#
-my $basename = GetBasename($upfile);
+my $query = new CGI;
+$callback = $query->param('callback');
 
-#
-# At this point, do whatever we want with the file.
-#
-# We are going to use the scalar $upfile as a filehandle,
-# but perl will complain so we turn off ref checking.
-# The newer CGI::upload() function obviates the need for
-# this. In new versions do $fh = $cgi->upload('upfile'); 
-# to get a legitimate, clean filehandle.
-#
-no strict 'refs';
-#my $fh = $cgi->upload('upfile'); 
-#if (! $fh ) {
-#	print "Can't get file handle to uploaded file.";
-#	exit(-1);
-#}
+# my $filename = $query->param("photo");
+my $filename = $query->param('myFile');
+my $token    = $query->param('token');
+my $token_timeout = $query->param('token_timeout');
+# my $mimetype = $query->uploadInfo($filename)->{'Content-Type'};
 
-#######################################################
-# Choose one of the techniques below to read the file.
-# What you do with the contents is, of course, applica-
-# tion specific. In these examples, we just write it to
-# a temporary file. 
-#
-# With text files coming from a Windows client, probably
-# you will want to strip out the extra linefeeds.
-########################################################
-
-#
-# Get a handle to some file to store the contents
-#
-if (! open(OUTFILE, ">/tmp/$basename") ) {
-	#print "Can't open /tmp/outfile for writing - $!";
-	exit(-1);
+if ( !$filename ){
+	# print $query->header ( );
+	# print "There was a problem uploading your photo (try a smaller file).";
+	$perl_response{error} = 'Problem uploading, maybe the file too big (>5Mo)';
+	# print $query->param;
+	# exit;
 }
+else{
 
-# give some feedback to browser
-#print "Saving the file to /tmp<br>\n";
+	my ( $name, $path, $extension ) = fileparse ( $filename, qr"((\.[^.\s]+)+)$" );
+	$filename = $name . $extension;
+	$filename =~ tr/ /_/;
+	$filename =~ s/[^$safe_filename_characters]//g;
 
-#
-# 1. If we know it's a text file, strip carriage returns
-#    and write it out.
-#
-#while (<$upfile>) {
-# or 
-#while (<$fh>) {
-#	s/\r//;
-#	print OUTFILE "$_";
-#}
-
-#
-# 2. If it's binary or we're not sure...
-#
-my $nBytes = 0;
-my $totBytes = 0;
-my $buffer = "";
-# If you're on Windows, you'll need this. Otherwise, it
-# has no effect.
-binmode($upfile);
-#binmode($fh);
-while ( $nBytes = read($upfile, $buffer, 1024) ) {
-#while ( $nBytes = read($fh, $buffer, 1024) ) {
-	print OUTFILE $buffer;
-	$totBytes += $nBytes;
-}
-
-close(OUTFILE);
-
-#
-# Turn ref checking back on.
-#
-use strict 'refs';
-
-# more lame feedback
-#print "thanks for uploading $basename ($totBytes bytes)<br>\n";	
-
-
-##############################################
-# Subroutines
-##############################################
-
-#
-# GetBasename - delivers filename portion of a fullpath.
-#
-sub GetBasename {
-	my $fullname = shift;
-
-	my(@parts);
-	# check which way our slashes go.
-	if ( $fullname =~ /(\\)/ ) {
-		@parts = split(/\\/, $fullname);
-	} else {
-		@parts = split(/\//, $fullname);
+	if ( $filename =~ /^([$safe_filename_characters]+)$/ ){
+		$filename = $1;
+	}
+	else{
+		$perl_response{error} = 'Filename contains invalid characters';
+		die "Filename contains invalid characters";
 	}
 
-	return(pop(@parts));
+	my $string_gen = String::Random->new;
+	#Generate a 25 character hash.
+	my $alea = $string_gen->randregex('\w{25}');
+
+	# my $upload_filehandle = $query->upload("photo");
+	my $upload_filehandle = $query->upload("myFile");
+
+	open ( UPLOADFILE, ">", "$upload_dir/$alea" ) or die "$!";
+	binmode UPLOADFILE;
+
+	while ( <$upload_filehandle> ){
+		print UPLOADFILE;
+	}
+
+	close UPLOADFILE;
+	# $perl_response{success} = 'File uploaded';
+	# $perl_response{name} = $filename;
+	# $perl_response{hash} = $alea;
+	my $ua = LWP::UserAgent->new;
+
+	my $response_1 = $ua->get($cfg->param('webso_services').
+		uri_encode('/db/get.pl?'.
+			$cfg->param('db_type').'='.$cfg->param('t_user').
+			'&'.$cfg->param('db_token').'='.$token.
+			'&'.$cfg->param('db_token_timeout').'='.$token_timeout));
+	# my $response_1 = $ua->get($cfg->param('webso_services').uri_encode('/db/get.pl?type_s=user&token_s='.$token.'&token_timeout_l='.$token_timeout));
+
+	if ($response_1->is_success) {
+		my $response_text_1 = $json->decode($response_1->decoded_content);
+		if($response_text_1->{success}->{response}->{numFound} eq 1){
+			my $mime_type = mimetype($filename);
+			my $response_2 = $ua->get($cfg->param('webso_services').
+				uri_encode('/db/put.pl?'.
+					$cfg->param('db_type').'='.$cfg->param('t_file').
+					'&'.$cfg->param('db_filename').'='.$filename.
+					'&'.$cfg->param('db_file_id').'='.$alea.
+					'&'.$cfg->param('db_mime_type').'='.$mime_type.
+					'&'.$cfg->param('db_file_extension').'='.$extension.
+					'&'.$cfg->param('db_user').'='.$response_text_1->{success}->{response}->{docs}[0]->{id}));
+			# my $response_2 = $ua->get($cfg->param('webso_services').uri_encode('/db/put.pl?type_s=file&filename_s='.$filename.'&file_s='.$alea.'&user_s='.$response_text_1->{success}->{response}->{docs}[0]->{id}));
+			if ($response_2->is_success) {
+				$perl_response{success} = 'File uploaded';
+				$perl_response{name} = $filename;
+				$perl_response{hash} = $alea;
+				# $perl_response{mimetype} = $mimetype;
+			}else{
+				$perl_response{error} = "sources server or service2: ".$response_2->code;
+				if ($deb_mod) {
+					$perl_response{debug_msg} = $response_2->message;
+				}
+			}
+		}else{
+			$perl_response{error} = "No account available";
+		}
+	}else{
+		$perl_response{error} = "sources server or service1: ".$response_1->code;
+		if ($deb_mod) {
+			$perl_response{debug_msg} = $response_1->message;
+		}
+	}
+
+	$perl_response{db_status} = $query->Vars;
 }
 
+my $json_response   = $json->pretty->encode(\%perl_response);
+
 if ($callback) {
-    print 'Access-Control-Allow-Origin: *';
-    print 'Access-Control-Allow-Methods: GET, PUT'."\n";
-    print "Content-type: application/javascript; charset=utf-8\n\n";
-    $json_response   = $callback.'('.$json_response.');';
+	print 'Access-Control-Allow-Origin: *';
+	print 'Access-Control-Allow-Methods: GET, PUT'."\n";
+	print "Content-type: application/javascript; charset=utf-8\n\n";
+	$json_response   = $callback.'('.$json_response.');';
 } else {
-    # Header for access via browser, curl, etc.
-    print 'Access-Control-Allow-Headers: Content-Type';
-    print 'Access-Control-Allow-Origin: x-requested-with';
-    print 'Access-Control-Allow-Methods: GET, PUT, OPTIONS'."\n";
-    print "Content-type: application/json\n\n";
+	# Header for access via browser, curl, etc.
+	print 'Access-Control-Allow-Headers: Content-Type';
+	print 'Access-Control-Allow-Origin: x-requested-with';
+	print 'Access-Control-Allow-Methods: GET, PUT, OPTIONS'."\n";
+	print "Content-type: application/json\n\n";
 }
 
 print $json_response;
