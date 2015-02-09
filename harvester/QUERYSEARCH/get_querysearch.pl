@@ -29,6 +29,7 @@ use HTML::Entities;
 use utf8;
 use XML::FeedPP;
 use Encode qw(decode encode);
+use DateTime::Format::Strptime;
 
 
 my $service = {
@@ -38,7 +39,8 @@ my $service = {
     faroo_news => 'http://www.faroo.com/api?start=1&length=10&l=en&src=news&f=rss&q=',
 
 
-    google_news => 'https://news.google.com/news?pz=1&ned=us&hl=en&output=rss&q=',
+    # google_news => 'https://news.google.com/news?pz=1&ned=us&hl=en&output=rss&q=',
+    google_news => 'https://news.google.com/news?pz=1&ned=fr&hl=fr&output=rss&q=',
     # title.$t description.$t pubDate.$t link.$t (description in html)
     delicious   => 'http://delicious.com/v2/rss/popular/',
     # title.$t description.$t pubDate.$t link.$t
@@ -52,7 +54,23 @@ my $service = {
 
 };
 
+my $googleNews_parser = DateTime::Format::Strptime->new(
+  pattern => '%a, %d %b %Y %H:%M:%S %Z',
+  locale    => 'en_US',
+  on_error => 'croak',
+);
 
+my $reddit_parser = DateTime::Format::Strptime->new(
+  pattern => '%a, %d %b %Y %H:%M:%S %z',
+  locale    => 'en_US',
+  on_error => 'croak',
+);
+
+my $faroo_parser = DateTime::Format::Strptime->new(
+  pattern => '%a, %d %b %Y %H:%M:%S',
+  locale    => 'en_US',
+  on_error => 'croak',
+);
 
 
 my $cfg = new Config::Simple('../../webso.cfg');
@@ -114,7 +132,7 @@ if ($query && $type) {
             }
             else {
 
-                $perl_response{'error'} = 'type does\'nt exist';
+                $perl_response{'error'} = 'type doesn\'t exist';
 
             }
         }
@@ -128,6 +146,7 @@ if ($query && $type) {
                 $$item{link}{'$t'} =~ s/http:\/\/news\.google\.com\/news\/url(.*?)&url=(.*?)$/$2/;
                 utf8::decode($$item{title}{'$t'});
                 utf8::decode($$item{description}{'$t'});
+                $$item{pubDate}{'$t'} =  $googleNews_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
                 #print $$item{link}{'$t'} ."\n";
 
                 my $hs = HTML::Restrict->new();
@@ -137,27 +156,34 @@ if ($query && $type) {
             elsif ($$item{t} eq 'reddit') {
                 my $hs = HTML::Restrict->new();
                 $$item{description}{'$t'} = $hs->process($$item{description}{'$t'});
+                $$item{pubDate}{'$t'} =  $reddit_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
 
             }
             elsif ($$item{t} eq 'faroo_news') {
-                 my $hs = HTML::Restrict->new();
-                 $$item{description}{'$t'} = $hs->process($$item{description}{'$t'});
+                my $hs = HTML::Restrict->new();
+                $$item{description}{'$t'} = $hs->process($$item{description}{'$t'});
+                $$item{pubDate}{'$t'} =  $faroo_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
             }
             elsif ($$item{t} eq 'bing_news') {
 
                 $$item{link}{'$t'} =~ s/http:\/\/www\.bing\.com\/news\/apiclick\.aspx(.*?)&url=(.*?)&(.*?)$/$2/;
 
                 $$item{link}{'$t'} = uri_decode($$item{link}{'$t'});
+                $$item{pubDate}{'$t'} =  $googleNews_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
             }
             elsif ($$item{t} eq 'google_blog') {
               $$item{pubDate}{'$t'} = $$item{'dc$date'}{'$t'};
-
+              $$item{pubDate}{'$t'} = $googleNews_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
             }
             elsif ($$item{t} eq 'yahoo_news') {
 
                 $$item{link}{'$t'} =~ s/http\:\/\/ri\.search\.yahoo\.com\/(.*?)\/RU=(.*?)\/RK(.*?)$/$2/;
 
                 $$item{link}{'$t'} = uri_decode($$item{link}{'$t'});
+                $$item{pubDate}{'$t'} =  $reddit_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
+            }
+            elsif ($$item{t} eq 'delicious') {
+                $$item{pubDate}{'$t'} =  $reddit_parser->parse_datetime($$item{pubDate}{'$t'})."Z";
             }
 
             # general cleaning ga campaign
@@ -176,8 +202,8 @@ if ($query && $type) {
             $$item{description} = clean_content($$item{description});
             $$item{title}       = clean_content($$item{title});
 
-            $$item{description} = highlight_keywords($$item{description},$query);
-            $$item{title}       = highlight_keywords($$item{title},$query);
+            $$item{description_highlight} = highlight_keywords($$item{description},$query);
+            $$item{title_highlight}       = highlight_keywords($$item{title},$query);
 
 
             #dd($item);exit;
