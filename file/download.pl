@@ -64,7 +64,7 @@ my %perl_response = ();
 
 my $callback = q{};
 
-if ($fileID eq '') {
+if ($fileID eq '' || $fileID eq 'f_') {
 	print "Content-type: text/html\n\n";
 	print "You must specify a file to download.\n";
 	$perl_response{error} = "You must specify a file to download.";
