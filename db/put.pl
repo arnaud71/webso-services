@@ -37,6 +37,7 @@ my %perl_response = (
     );
 
 my $callback = q{};
+my $query='';
 
 # print json header
 # print $q->header('application/json');
@@ -62,6 +63,8 @@ my $db_widget_type          = $cfg->param('db_widget_type');
 my $db_enable               = $cfg->param('db_enable');
 my $db_weight               = $cfg->param('db_weight');
 my $db_waiting              = $cfg->param('db_waiting');
+my $db_file_id              = $cfg->param('db_file_id');
+my $db_tags                 = $cfg->param('db_tags');
 
 
 # current date
@@ -85,7 +88,7 @@ else {
     # if source type
     my $rss_json_doc;
     if ($$cgi{$db_type} eq $cfg->param('t_source')) {
-        $id = 's_'.md5_hex($$cgi{$db_user}.$$cgi{$db_url}.$tm); #add s_ for source
+        $id = 's_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title}.$tm); #add s_ for source
         if ($$cgi{refresh_rate_s}) {
             $$cgi{refresh_rate_s} = '12h'; # default rate each 23h
         }
@@ -142,8 +145,8 @@ else {
         $id = 't_'.md5_hex($$cgi{$db_user}.$$cgi{$db_title});
     }
 
-    if($$cgi{$db_type} eq 'file'){
-        $id = 'f_'.$$cgi{'file_s'};
+    if($$cgi{$db_type} eq $cfg->param('t_file')){
+        $id = 'f_'.$$cgi{$db_file_id};
     }
 
     if ($q->param('callback')) {
@@ -156,13 +159,50 @@ else {
     # add id
 
     $$cgi{id} = $id;
+    print$$cgi{source_id_ss};
 
     # add current date
 
     $$cgi{$db_creation_date} = $str_now;
     $$cgi{$db_updating_date} = $str_now;
 
-    my $json_text   = $json->pretty->encode($cgi);
+    foreach my $k (keys %$cgi) {
+        if ($k ne 'callback') {
+            if ($k eq 'id') {
+                $query .= '"id":"'.$$cgi{$k}.'",';
+            }
+            elsif($k eq 'source_id_ss'){
+                my $t='';
+                my @test = split(',', $$cgi{$k});
+                foreach my $ve (@test){
+                    $t .= '"'.$ve.'",';
+                }
+                #Remove the last coma to prevent error
+                chop($t);
+                $query .= '"source_id_ss":{"set":['.$t.']},';
+            }
+            elsif($k eq $db_tags){
+                my $t='';
+                my @test = split(',', $$cgi{$k});
+                foreach my $ve (@test){
+                    #Trim spaces before and after
+                    $ve =~ s/^\s+|\s+$//g;
+                    $t .= '"'.$ve.'",';
+                }
+                #Remove the last coma to prevent error
+                chop($t);
+                $query .= '"tags_ss":{"set":['.$t.']},';
+            }
+            else{
+                $query .= '"'.$k.'":{"set":"'.$$cgi{$k}.'"},';
+            }
+        }
+    }
+    #remove last coma.
+    chop($query);
+
+    my $json_text = '{'.$query.'}'; #$json->pretty->encode($cgi);
+    print $json_text;
 
     # concatenate query and response
     %perl_response = (%perl_response,%$cgi);
