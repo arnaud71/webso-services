@@ -78,6 +78,7 @@ if (Config::Simple->error()) {
 else {
     my $deb_mod = $cfg->param('debug');
     my $id = q{};
+    my $tree = 0;
 
     if($q->param('POSTDATA')){
         my @var = $json->decode($$cgi{'POSTDATA'});
@@ -149,6 +150,11 @@ else {
         $id = 'f_'.$$cgi{$db_file_id};
     }
 
+    if($$cgi{$db_type} eq $cfg->param('t_tree') && ($$cgi{$db_title} eq 'wfolder' || $$cgi{$db_title} eq 'vfolder')){
+        $$cgi{'content_s'} = $json->pretty->encode($$cgi{'content_s'});
+        $tree = 1;
+    }
+
     if ($q->param('callback')) {
         $callback    = $q->param('callback');
     }
@@ -159,7 +165,7 @@ else {
     # add id
 
     $$cgi{id} = $id;
-    print$$cgi{source_id_ss};
+    # print$$cgi{source_id_ss};
 
     # add current date
 
@@ -193,6 +199,9 @@ else {
                 chop($t);
                 $query .= '"tags_ss":{"set":['.$t.']},';
             }
+            elsif($k eq 'content_s' && $tree){
+                $query .= '"'.$k.'":{"set":'.$$cgi{$k}.'},';
+            }
             else{
                 $query .= '"'.$k.'":{"set":"'.$$cgi{$k}.'"},';
             }
@@ -202,7 +211,7 @@ else {
     chop($query);
 
     my $json_text = '{'.$query.'}'; #$json->pretty->encode($cgi);
-    print $json_text;
+    # print $json_text;
 
     # concatenate query and response
     %perl_response = (%perl_response,%$cgi);
