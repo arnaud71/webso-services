@@ -65,6 +65,7 @@ my $db_weight               = $cfg->param('db_weight');
 my $db_waiting              = $cfg->param('db_waiting');
 my $db_file_id              = $cfg->param('db_file_id');
 my $db_tags                 = $cfg->param('db_tags');
+my $db_name                 = $cfg->param('db_name');
 
 
 # current date
@@ -148,6 +149,14 @@ else {
 
     if($$cgi{$db_type} eq $cfg->param('t_file')){
         $id = 'f_'.$$cgi{$db_file_id};
+    }
+
+    if($$cgi{$db_type} eq $cfg->param('t_company')){
+        $id = 'c_'.md5_hex($$cgi{$db_name}.$tm);
+    }
+
+    if($$cgi{$db_type} eq $cfg->param('t_group')){
+        $id = 'g_'.md5_hex($$cgi{$db_name}.$tm);
     }
 
     if($$cgi{$db_type} eq $cfg->param('t_tree') && ($$cgi{$db_title} eq 'wfolder' || $$cgi{$db_title} eq 'vfolder')){
